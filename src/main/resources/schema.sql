@@ -1,0 +1,3 @@
+CREATE TABLE test (
+last_name VARCHAR(255) NOT NULL
+);
