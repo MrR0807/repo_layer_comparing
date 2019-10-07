@@ -1,4 +1,4 @@
-package jpa.entity;
+package lt.comparing.jpa.entity;
 
 import javax.persistence.*;
 import java.util.HashSet;
