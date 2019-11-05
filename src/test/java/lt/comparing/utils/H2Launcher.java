@@ -1,18 +1,20 @@
 package lt.comparing.utils;
 
+import lt.comparing.plainjdbc.JDBCUtil;
 import org.h2.tools.Server;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class H2Launcher {
 
     private Server server = null;
+    private static final String URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
 
     public H2Launcher() {
         try {
@@ -22,25 +24,44 @@ public class H2Launcher {
         }
     }
 
-    public void launch() {
-        var url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
+    public void initDatabase() {
+        Connection connection = null;
 
-        try (Connection con = DriverManager.getConnection(url)) {
-            con.setAutoCommit(false);
-            Statement stm = con.createStatement();
+        try {
+            connection = JDBCUtil.getConnection();
+            var stm = connection.createStatement();
+
             stm.execute(this.loadSQL("schema.sql"));
             stm.execute(this.loadSQL("data.sql"));
-            con.commit();
-
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            JDBCUtil.rollback(connection);
+        } finally {
+            JDBCUtil.closeConnection(connection);
+        }
+    }
+
+    public void restart() {
+        Connection connection = null;
+
+        try {
+            connection = JDBCUtil.getConnection();
+            var stm = connection.createStatement();
+
+            stm.execute(this.loadSQL("clear.sql"));
+            connection.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JDBCUtil.rollback(connection);
+        } finally {
+            JDBCUtil.closeConnection(connection);
         }
     }
 
     public void close() {
         server.shutdown();
     }
-
 
     private String loadSQL(String resourceName) {
         try {
