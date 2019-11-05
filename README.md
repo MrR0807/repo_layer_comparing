@@ -3,7 +3,6 @@ This repository is for creating the same database calls with different technolog
 - Plain JDBC;
 - Spring's JDBC Template;
 - Spring Data;
-- JDBI;
 - jOOQ;
 - JDBI;
 - MyBaitis.
