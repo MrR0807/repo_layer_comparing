@@ -3,6 +3,7 @@ package lt.comparing;
 import lt.comparing.plainjdbc.RepoJDBC;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +11,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RepoTest {
 
-    private final Repo repo = new RepoJDBC();
-    private final H2Launcher h2Launcher = new H2Launcher();
+    private static Repo repo;
+    private static H2Launcher h2Launcher;
+
+    @BeforeAll
+    static void initialize() {
+        h2Launcher = new H2Launcher();
+        repo = new RepoJDBC();
+    }
 
     @BeforeEach
     void setUp() {

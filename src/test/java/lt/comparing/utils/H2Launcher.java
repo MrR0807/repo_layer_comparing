@@ -1,20 +1,20 @@
 package lt.comparing.utils;
 
-import lt.comparing.plainjdbc.JDBCUtil;
+import lt.comparing.config.H2DataSource;
 import org.h2.tools.Server;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 public class H2Launcher {
 
     private Server server = null;
-    private static final String URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
+    private DataSource dataSource = H2DataSource.dataSource();
 
     public H2Launcher() {
         try {
@@ -25,37 +25,26 @@ public class H2Launcher {
     }
 
     public void initDatabase() {
-        Connection connection = null;
-
-        try {
-            connection = JDBCUtil.getConnection();
-            var stm = connection.createStatement();
+        try (var connection = dataSource.getConnection();
+             var stm = connection.createStatement()) {
+            connection.setAutoCommit(false);
 
             stm.execute(this.loadSQL("schema.sql"));
             stm.execute(this.loadSQL("data.sql"));
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            JDBCUtil.rollback(connection);
-        } finally {
-            JDBCUtil.closeConnection(connection);
         }
     }
 
     public void restart() {
-        Connection connection = null;
-
-        try {
-            connection = JDBCUtil.getConnection();
-            var stm = connection.createStatement();
+        try (var connection = dataSource.getConnection();
+             var stm = connection.createStatement()) {
 
             stm.execute(this.loadSQL("clear.sql"));
             connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
-            JDBCUtil.rollback(connection);
-        } finally {
-            JDBCUtil.closeConnection(connection);
         }
     }
 

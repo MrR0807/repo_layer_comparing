@@ -21,12 +21,11 @@ public class HikariConfiguration {
 
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
-//        config.setUsername("sa");
-//        config.setPassword("");
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
 
-        return new HikariDataSource(config);
+        dataSource = new HikariDataSource(config);
+        return dataSource;
     }
 }

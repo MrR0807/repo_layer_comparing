@@ -1,8 +1,9 @@
 package lt.comparing.plainjdbc;
 
 import lt.comparing.Repo;
+import lt.comparing.config.H2DataSource;
 
-import java.sql.DriverManager;
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -10,12 +11,12 @@ public class RepoJDBC implements Repo {
 
     private final static String SELECT_QUERY = "SELECT * FROM test WHERE last_name = 'goodbye'";
 
+    private final DataSource dataSource = H2DataSource.dataSource();
+
     @Override
     public String get() {
-        var url = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
-
-        try (var con = DriverManager.getConnection(url);
-            var ps = con.prepareStatement(SELECT_QUERY)) {
+        try (var con = dataSource.getConnection();
+             var ps = con.prepareStatement(SELECT_QUERY)) {
 
             ResultSet resultSet = ps.executeQuery();
 
