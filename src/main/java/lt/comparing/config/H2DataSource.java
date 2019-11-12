@@ -16,8 +16,16 @@ public class H2DataSource {
             return dataSource;
         }
         dataSource = new JdbcDataSource();
-//        dataSource.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=3;TRACE_LEVEL_SYSTEM_OUT=3");
         dataSource.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+        return dataSource;
+    }
+
+    public static DataSource dataSourceWithTracing() {
+        if (dataSource != null) {
+            return dataSource;
+        }
+        dataSource = new JdbcDataSource();
+        dataSource.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=3;TRACE_LEVEL_SYSTEM_OUT=3");
         return dataSource;
     }
 }

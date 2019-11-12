@@ -1,11 +1,16 @@
 package lt.comparing;
 
+import lt.comparing.config.H2DataSource;
 import lt.comparing.plainjdbc.RepoJDBC;
+import lt.comparing.plainjdbc.entity.Employee;
+import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +22,7 @@ class RepoTest {
     @BeforeAll
     static void initialize() {
         h2Launcher = new H2Launcher();
-        repo = new RepoJDBC();
+        repo = new RepoJDBC(H2DataSource.dataSource());
     }
 
     @BeforeEach
@@ -32,17 +37,23 @@ class RepoTest {
 
     @Test
     void get() {
-        String result = repo.get();
+        Employee result = repo.getEmployee(1);
+        Employee expected = expected();
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo("goodbye");
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
     void testAgain() {
-        String result = repo.get();
+        Employee result = repo.getEmployee(1);
+        Employee expected = expected();
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo("goodbye");
+        assertThat(result).isEqualTo(expected);
+    }
+
+    private Employee expected() {
+        return new Employee(1, "First1", "Last1", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, null);
     }
 }

@@ -13,12 +13,11 @@ import java.sql.SQLException;
 
 public class H2Launcher {
 
-    private Server server = null;
     private DataSource dataSource = H2DataSource.dataSource();
 
     public H2Launcher() {
         try {
-            server = Server.createTcpServer().start();
+            Server.createTcpServer().start();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -46,10 +45,6 @@ public class H2Launcher {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    public void close() {
-        server.shutdown();
     }
 
     private String loadSQL(String resourceName) {
