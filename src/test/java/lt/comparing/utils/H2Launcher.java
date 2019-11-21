@@ -11,16 +11,38 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 
+/**
+ * To launch web console as well use startWebServer() and connect to:
+ * localhost:8082
+ * jdbc:h2:mem:test
+ * username: leave blank
+ * password: leave blank
+ */
 public class H2Launcher {
 
     private DataSource dataSource = H2DataSource.dataSource();
 
-    public H2Launcher() {
+    public static H2Launcher startWebServer() {
         try {
-            Server.createTcpServer().start();
+            Server.createWebServer().start();
+            return new H2Launcher();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        throw new IllegalArgumentException("Could not start H2 database");
+    }
+
+    public static H2Launcher startTcpServer() {
+        try {
+            Server.createTcpServer().start();
+            return new H2Launcher();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        throw new IllegalArgumentException("Could not start H2 database");
+    }
+
+    private H2Launcher() {
     }
 
     public void initDatabase() {

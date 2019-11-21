@@ -1,9 +1,11 @@
 package lt.comparing;
 
 import lt.comparing.config.H2DataSource;
+import lt.comparing.fixture.EmployeeBuilder;
 import lt.comparing.plainjdbc.RepoJDBC;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
+import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,6 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +26,7 @@ class RepoTest {
 
     @BeforeAll
     static void initialize() {
-        h2Launcher = new H2Launcher();
+        h2Launcher = H2Launcher.startTcpServer();
         repo = new RepoJDBC(H2DataSource.dataSource());
     }
 
@@ -36,24 +41,39 @@ class RepoTest {
     }
 
     @Test
-    void get() {
+    void getEmployee() {
         Employee result = repo.getEmployee(1);
-        Employee expected = expected();
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(expected);
+        assertThat(result).isEqualTo(expected());
     }
 
     @Test
-    void testAgain() {
-        Employee result = repo.getEmployee(1);
-        Employee expected = expected();
+    void getEmployeeFullGraph() {
+        Employee expected = defaultEmployee()
+                .withProjects(List.of(new Project(2001, "Super project"), new Project(2003, "Average project")))
+                .build();
+
+        Employee result = repo.getEmployeeFullGraph(1);
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(expected);
+        assertThat(result).isEqualToIgnoringGivenFields(expected, "salary", "projects");
+        assertThat(result.getSalary()).isEqualTo(expected.getSalary());
+        assertThat(result.getProjects()).containsOnlyElementsOf(expected.getProjects());
     }
 
     private Employee expected() {
-        return new Employee(1, "First1", "Last1", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, null);
+        return defaultEmployee().build();
+    }
+
+    private EmployeeBuilder defaultEmployee() {
+        return EmployeeBuilder.anEmployee()
+                .withId(1)
+                .withFirstName("First1")
+                .withLastName("Last1")
+                .withSalary(BigDecimal.valueOf(1000.00).setScale(2, RoundingMode.HALF_UP))
+                .withEmployeeType(EmployeeType.EMPLOYEE)
+                .withCubicle(null)
+                .withProjects(new ArrayList<>());
     }
 }

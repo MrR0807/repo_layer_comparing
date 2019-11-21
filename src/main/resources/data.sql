@@ -18,11 +18,13 @@ VALUES
 INSERT INTO company.project (id, project_name)
 VALUES
 (2001, 'Super project'),
-(2002, 'Terrible project');
+(2002, 'Terrible project'),
+(2003, 'Average project');
 
 INSERT INTO company.employee_project (employee_id, project_id)
 VALUES
 (1, 2001),
+(1, 2003),
 (2, 2001),
 (3, 2002),
 (4, 2002);

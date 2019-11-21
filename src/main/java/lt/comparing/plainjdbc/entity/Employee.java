@@ -1,6 +1,8 @@
 package lt.comparing.plainjdbc.entity;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Employee {
@@ -10,15 +12,17 @@ public class Employee {
     private final String lastName;
     private final BigDecimal salary;
     private final EmployeeType employeeType;
-    private Cubicle cubicle;
+    private final Cubicle cubicle;
+    private final List<Project> projects;
 
-    public Employee(long id, String firstName, String lastName, BigDecimal salary, EmployeeType employeeType, Cubicle cubicle) {
+    public Employee(long id, String firstName, String lastName, BigDecimal salary, EmployeeType employeeType, Cubicle cubicle, List<Project> projects) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = salary;
         this.employeeType = employeeType;
         this.cubicle = cubicle;
+        this.projects = Objects.requireNonNullElse(projects, new ArrayList<>());
     }
 
     public long getId() {
@@ -43,6 +47,14 @@ public class Employee {
 
     public Cubicle getCubicle() {
         return cubicle;
+    }
+
+    public List<Project> getProjects() {
+        return projects;
+    }
+
+    public void addProject(Project project) {
+        this.projects.add(project);
     }
 
     @Override
