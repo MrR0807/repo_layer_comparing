@@ -2,7 +2,6 @@ package lt.comparing.plainjdbc;
 
 import lt.comparing.Repo;
 import lt.comparing.plainjdbc.entity.Employee;
-import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
 
 import javax.sql.DataSource;
@@ -10,23 +9,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
-import static java.util.Objects.isNull;
+import static lt.comparing.plainjdbc.EmployeeSQLStatements.*;
+import static lt.comparing.plainjdbc.ResultSetToEmployeeMapper.toEmployee;
+import static lt.comparing.plainjdbc.ResultSetToEmployeeMapper.toEmployeeWithProjects;
 
 public class RepoJDBC implements Repo {
-
-    private static final String SELECT_EMPLOYEE = "" +
-            "SELECT e.id e_id, e.first_name e_first_name, e.last_name e_last_name, e.salary e_salary, " +
-            "e.employee_type e_employee_type " +
-            "FROM company.employee e WHERE e.id = ?";
-    private static final String SELECT_EMPLOYEE_AND_PROJECTS = "" +
-            "SELECT e.id e_id, e.first_name e_first_name, e.last_name e_last_name, e.salary e_salary, e.employee_type e_employee_type, " +
-            "p.id p_id, p.project_name p_project_name " +
-            "FROM company.employee e " +
-            "INNER JOIN company.employee_project ep ON e.id = ep.employee_id " +
-            "INNER JOIN company.project p ON ep.project_id = p.id " +
-            "WHERE e.id = ?";
 
     private final DataSource dataSource;
 
@@ -36,61 +27,74 @@ public class RepoJDBC implements Repo {
 
     @Override
     public Employee getEmployee(long employeeId) {
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_EMPLOYEE)) {
-
+        ActionWithPreparedStatement<Optional<Employee>> action = ps -> {
             ps.setLong(1, employeeId);
             ResultSet resultSet = ps.executeQuery();
 
-            if (resultSet.next()) {
-                return toEmployee(resultSet);
-            }
+            return resultSet.next()
+                    ? Optional.of(toEmployee(resultSet))
+                    : Optional.empty();
+        };
 
+        return actionOnPreparedStatement(SELECT_EMPLOYEE, action).orElseThrow();
+    }
+
+    private  <T> T actionOnPreparedStatement(String select, ActionWithPreparedStatement<T> function) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(select)) {
+
+            return function.inPreparedStatement(ps);
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Cannot find employee");
         }
-        throw new RuntimeException("Cannot find employee");
+    }
+
+    @Override
+    public List<Employee> getEmployees() {
+        ActionWithPreparedStatement<List<Employee>> action = ps -> {
+            ResultSet resultSet = ps.executeQuery();
+            List<Employee> employees = new LinkedList<>();
+
+            while (resultSet.next()) {
+                var employee = toEmployee(resultSet);
+                employees.add(employee);
+            }
+
+            return employees;
+        };
+
+
+        return actionOnPreparedStatement(SELECT_EMPLOYEES, action);
     }
 
     @Override
     public Employee getEmployeeFullGraph(long employeeId) {
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_EMPLOYEE_AND_PROJECTS)) {
-
+        ActionWithPreparedStatement<Employee> action = ps -> {
             ps.setLong(1, employeeId);
             ResultSet resultSet = ps.executeQuery();
 
             return toEmployeeWithProjects(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        throw new RuntimeException("Cannot find employee");
+        };
+
+        return actionOnPreparedStatement(SELECT_EMPLOYEE_AND_PROJECTS, action);
     }
 
-    private Employee toEmployeeWithProjects(ResultSet resultSet) throws SQLException {
-        Employee employee = null;
+    @Override
+    public List<Employee> getEmployeesFullGraph() {
+        ActionWithPreparedStatement<List<Employee>> action = ps -> {
+            ResultSet resultSet = ps.executeQuery();
+            List<Employee> employees = new LinkedList<>();
 
-        while (resultSet.next()) {
-            if (isNull(employee)) {
-                employee = toEmployee(resultSet);
+            while (resultSet.next()) {
+                var employee = toEmployee(resultSet);
+                employees.add(employee);
             }
 
-            var projectId = resultSet.getLong("p_id");
-            var projectName = resultSet.getString("p_project_name");
-            employee.addProject(new Project(projectId, projectName));
-        }
+            return employees;
+        };
 
-        return employee;
-    }
-
-    private Employee toEmployee(ResultSet resultSet) throws SQLException {
-        var id = resultSet.getLong("e_id");
-        var firstName = resultSet.getString("e_first_name");
-        var lastName = resultSet.getString("e_last_name");
-        var salary = resultSet.getBigDecimal("e_salary");
-        var employeeType = EmployeeType.valueOf(resultSet.getString("e_employee_type"));
-        var listOfProjects = new ArrayList<Project>();
-        return new Employee(id, firstName, lastName, salary, employeeType, null, listOfProjects);
+        return actionOnPreparedStatement(SELECT_ALL_EMPLOYEES_AND_PROJECTS, action);
     }
 
     @Override

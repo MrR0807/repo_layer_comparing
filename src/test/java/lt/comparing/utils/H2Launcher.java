@@ -71,7 +71,7 @@ public class H2Launcher {
 
     private String loadSQL(String resourceName) {
         try {
-            URI resource = getClass().getClassLoader().getResource(resourceName).toURI();
+            URI resource = H2Launcher.class.getResource("/resources/" + resourceName).toURI();
             return String.join("", Files.readAllLines(Path.of(resource)));
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();

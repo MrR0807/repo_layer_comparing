@@ -1,10 +1,8 @@
 package lt.comparing;
 
 import lt.comparing.config.H2DataSource;
-import lt.comparing.fixture.EmployeeBuilder;
 import lt.comparing.plainjdbc.RepoJDBC;
 import lt.comparing.plainjdbc.entity.Employee;
-import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
@@ -12,11 +10,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.List;
 
+import static lt.comparing.fixture.EmployeesFixture.defaultEmployee;
+import static lt.comparing.fixture.EmployeesFixture.employees;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RepoTest {
@@ -62,18 +59,20 @@ class RepoTest {
         assertThat(result.getProjects()).containsOnlyElementsOf(expected.getProjects());
     }
 
+    @Test
+    void getEmployees() {
+        List<Employee> expected = employees();
+
+        List<Employee> result = repo.getEmployees();
+
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(4);
+        assertThat(result).containsExactlyElementsOf(expected);
+    }
+
     private Employee expected() {
         return defaultEmployee().build();
     }
 
-    private EmployeeBuilder defaultEmployee() {
-        return EmployeeBuilder.anEmployee()
-                .withId(1)
-                .withFirstName("First1")
-                .withLastName("Last1")
-                .withSalary(BigDecimal.valueOf(1000.00).setScale(2, RoundingMode.HALF_UP))
-                .withEmployeeType(EmployeeType.EMPLOYEE)
-                .withCubicle(null)
-                .withProjects(new ArrayList<>());
-    }
+
 }
