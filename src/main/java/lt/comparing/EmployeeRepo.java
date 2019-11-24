@@ -1,11 +1,10 @@
 package lt.comparing;
 
 import lt.comparing.plainjdbc.entity.Employee;
-import lt.comparing.plainjdbc.entity.Project;
 
 import java.util.List;
 
-public interface Repo {
+public interface EmployeeRepo {
 
     Employee getEmployee(long employeeId);
 
@@ -14,6 +13,4 @@ public interface Repo {
     Employee getEmployeeFullGraph(long employeeId);
 
     List<Employee> getEmployeesFullGraph();
-
-    Project getProject(long projectId);
 }

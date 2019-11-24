@@ -5,5 +5,5 @@ import java.sql.SQLException;
 
 public interface ActionWithPreparedStatement<T> {
 
-    T inPreparedStatement(PreparedStatement preparedStatement) throws SQLException;
+    T action(PreparedStatement preparedStatement) throws SQLException;
 }

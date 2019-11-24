@@ -1,7 +1,7 @@
 package lt.comparing;
 
 import lt.comparing.config.H2DataSource;
-import lt.comparing.plainjdbc.RepoJDBC;
+import lt.comparing.plainjdbc.JdbcEmployeeRepo;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.utils.H2Launcher;
@@ -18,13 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RepoTest {
 
-    private static Repo repo;
+    private static EmployeeRepo repo;
     private static H2Launcher h2Launcher;
 
     @BeforeAll
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
-        repo = new RepoJDBC(H2DataSource.dataSource());
+        repo = new JdbcEmployeeRepo(H2DataSource.dataSource());
     }
 
     @BeforeEach
@@ -48,7 +48,9 @@ class RepoTest {
     @Test
     void getEmployeeFullGraph() {
         Employee expected = defaultEmployee()
-                .withProjects(List.of(new Project(2001, "Super project"), new Project(2003, "Average project")))
+                .withProjects(List.of(
+                        new Project(2001, "Super project"),
+                        new Project(2003, "Average project")))
                 .build();
 
         Employee result = repo.getEmployeeFullGraph(1);

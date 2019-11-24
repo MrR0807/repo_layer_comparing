@@ -1,5 +1,6 @@
 package lt.comparing.plainjdbc.entity;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Building {
