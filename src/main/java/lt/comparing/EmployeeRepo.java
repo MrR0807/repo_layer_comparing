@@ -3,14 +3,19 @@ package lt.comparing;
 import lt.comparing.plainjdbc.entity.Employee;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EmployeeRepo {
 
-    Employee getEmployee(long employeeId);
+    Optional<Employee> getEmployee(long employeeId);
 
     List<Employee> getEmployees();
 
-    Employee getEmployeeFullGraph(long employeeId);
+    Optional<Employee> getEmployeeFullGraph(long employeeId);
 
     List<Employee> getEmployeesFullGraph();
+
+    void saveEmployeeFullGraph(Employee employee);
+
+    void updateEmployeeFullGraph(Employee employee);
 }

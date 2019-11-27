@@ -1,5 +1,7 @@
 package lt.comparing.fixture;
 
+import lt.comparing.plainjdbc.entity.Building;
+import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 
@@ -18,7 +20,7 @@ public class EmployeesFixture {
         employees.add(defaultEmployee().build());
 
         for (int i = 2; i < 5; i++) {
-            EmployeeBuilder employeeBuilder = defaultEmployee()
+            EmployeeBuilder employeeBuilder = defaultEmployeeWithCubicle()
                     .withId(i)
                     .withFirstName("First" + i)
                     .withLastName("Last" + i);
@@ -39,6 +41,17 @@ public class EmployeesFixture {
                 .withSalary(BigDecimal.valueOf(1000.00).setScale(2, RoundingMode.HALF_UP))
                 .withEmployeeType(EmployeeType.EMPLOYEE)
                 .withCubicle(null)
+                .withProjects(new ArrayList<>());
+    }
+
+    public static EmployeeBuilder defaultEmployeeWithCubicle() {
+        return EmployeeBuilder.anEmployee()
+                .withId(1)
+                .withFirstName("First1")
+                .withLastName("Last1")
+                .withSalary(BigDecimal.valueOf(1000.00).setScale(2, RoundingMode.HALF_UP))
+                .withEmployeeType(EmployeeType.EMPLOYEE)
+                .withCubicle(new Cubicle(1001, new Building(1, "Big Building", "Address 1")))
                 .withProjects(new ArrayList<>());
     }
 }

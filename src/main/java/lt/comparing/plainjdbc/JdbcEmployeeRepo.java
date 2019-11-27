@@ -6,10 +6,12 @@ import lt.comparing.plainjdbc.entity.*;
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static lt.comparing.plainjdbc.EmployeeSQLStatements.*;
 
 public class JdbcEmployeeRepo implements EmployeeRepo {
@@ -21,17 +23,17 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
     }
 
     @Override
-    public Employee getEmployee(long employeeId) {
-        ActionWithPreparedStatement<Optional<Employee>> action = ps -> {
+    public Optional<Employee> getEmployee(long employeeId) {
+        ActionWithPreparedStatement<Employee> action = ps -> {
             ps.setLong(1, employeeId);
             ResultSet resultSet = ps.executeQuery();
 
             return resultSet.next()
-                    ? Optional.of(toEmployee(resultSet))
-                    : Optional.empty();
+                    ? toEmployee(resultSet)
+                    : null;
         };
 
-        return jdbcHelper.get(SELECT_EMPLOYEE, action).orElseThrow();
+        return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE, action));
     }
 
     @Override
@@ -53,7 +55,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
     }
 
     @Override
-    public Employee getEmployeeFullGraph(long employeeId) {
+    public Optional<Employee> getEmployeeFullGraph(long employeeId) {
         ActionWithPreparedStatement<Employee> action = ps -> {
             ps.setLong(1, employeeId);
             ResultSet resultSet = ps.executeQuery();
@@ -79,7 +81,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
             return employee;
         };
 
-        return jdbcHelper.get(SELECT_EMPLOYEE_FULL_GRAPH, action);
+        return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE_FULL_GRAPH, action));
     }
 
     @Override
@@ -97,6 +99,16 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
         };
 
         return jdbcHelper.get(SELECT_ALL_EMPLOYEES_AND_PROJECTS, action);
+    }
+
+    @Override
+    public void saveEmployeeFullGraph(Employee employee) {
+
+    }
+
+    @Override
+    public void updateEmployeeFullGraph(Employee employee) {
+
     }
 
     private static Employee toEmployee(ResultSet resultSet) throws SQLException {
