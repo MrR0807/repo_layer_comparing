@@ -1,4 +1,4 @@
-package lt.comparing;
+package lt.comparing.repo;
 
 import lt.comparing.plainjdbc.entity.Project;
 

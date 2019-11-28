@@ -7,13 +7,16 @@ import java.util.Objects;
 
 public class Employee {
 
-    private final long id;
-    private final String firstName;
-    private final String lastName;
-    private final BigDecimal salary;
-    private final EmployeeType employeeType;
-    private final Cubicle cubicle;
-    private final List<Project> projects;
+    private long id;
+    private String firstName;
+    private String lastName;
+    private BigDecimal salary;
+    private EmployeeType employeeType;
+    private Cubicle cubicle;
+    private List<Project> projects;
+
+    public Employee() {
+    }
 
     public Employee(long id, String firstName, String lastName, BigDecimal salary, EmployeeType employeeType, Cubicle cubicle, List<Project> projects) {
         this.id = id;
@@ -29,24 +32,48 @@ public class Employee {
         return id;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public String getFirstName() {
         return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getLastName() {
         return lastName;
     }
 
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     public BigDecimal getSalary() {
         return salary;
+    }
+
+    public void setSalary(BigDecimal salary) {
+        this.salary = salary;
     }
 
     public EmployeeType getEmployeeType() {
         return employeeType;
     }
 
+    public void setEmployeeType(EmployeeType employeeType) {
+        this.employeeType = employeeType;
+    }
+
     public Cubicle getCubicle() {
         return cubicle;
+    }
+
+    public void setCubicle(Cubicle cubicle) {
+        this.cubicle = cubicle;
     }
 
     public List<Project> getProjects() {

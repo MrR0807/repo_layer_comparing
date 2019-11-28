@@ -1,9 +1,11 @@
-package lt.comparing;
+package lt.comparing.service;
 
 import lt.comparing.config.H2DataSource;
-import lt.comparing.plainjdbc.JdbcEmployeeRepo;
+import lt.comparing.exceptions.EmployeeNotFoundException;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.JdbcEmployeeRepo;
+import lt.comparing.plainjdbc.service.JdbcEmployeeService;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,21 +13,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
-import static lt.comparing.fixture.EmployeesFixture.defaultEmployeeWithCubicle;
-import static lt.comparing.fixture.EmployeesFixture.employees;
+import static lt.comparing.fixture.EmployeesFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class EmployeeRepoTest {
+class EmployeeServiceTest {
 
-    private static EmployeeRepo repo;
+    private static EmployeeService service;
     private static H2Launcher h2Launcher;
 
     @BeforeAll
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
-        repo = new JdbcEmployeeRepo(H2DataSource.dataSource());
+        service = new JdbcEmployeeService(new JdbcEmployeeRepo(H2DataSource.dataSource()));
     }
 
     @BeforeEach
@@ -40,7 +42,7 @@ class EmployeeRepoTest {
 
     @Test
     void getEmployee() {
-        Employee result = repo.getEmployee(1).orElseThrow();
+        Employee result = service.getEmployee(1);
         Employee expected = defaultEmployeeWithCubicle().build();
 
         assertThat(result).isNotNull();
@@ -49,9 +51,9 @@ class EmployeeRepoTest {
 
     @Test
     void getEmployee__whenEmployeeDoesNotExists__thenReturnEmptyOptional() {
-        Optional<Employee> result = repo.getEmployee(999);
-
-        assertThat(result).isEmpty();
+        assertThatThrownBy(() -> service.getEmployee(999))
+                .isInstanceOf(EmployeeNotFoundException.class)
+                .hasMessage("Employee with id 999 not found");
     }
 
     @Test
@@ -62,7 +64,7 @@ class EmployeeRepoTest {
                         new Project(2003, "Average project")))
                 .build();
 
-        Employee result = repo.getEmployeeFullGraph(1).orElseThrow();
+        Employee result = service.getEmployeeFullGraph(1);
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualToIgnoringGivenFields(expected, "salary", "projects");
@@ -73,17 +75,20 @@ class EmployeeRepoTest {
 
     @Test
     void getEmployeeFullGraph__whenEmployeeDoesNotExists__thenThrowException() {
+        assertThatThrownBy(() -> service.getEmployeeFullGraph(999))
+                .isInstanceOf(EmployeeNotFoundException.class)
+                .hasMessage("Employee with id 999 not found");
     }
 
     @Test
     void getEmployeeFullGraph__whenProjectDoesNotExists__thenReturnEmptyProjectList() {
+
     }
 
     @Test
     void getEmployees() {
-        List<Employee> expected = employees();
-
-        List<Employee> result = repo.getEmployees();
+        Set<Employee> expected = employees();
+        Set<Employee> result = service.getEmployees();
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(4);
@@ -93,6 +98,16 @@ class EmployeeRepoTest {
     @Test
     void getEmployees__whenThereIsNoEmployees__thenReturnEmptyList() {
 
+    }
+
+    @Test
+    void getEmployeesFullGraph() {
+        Set<Employee> expected = employeesWithFullGraph();
+        Set<Employee> result = service.getEmployeesFullGraph();
+
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(4);
+        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
@@ -130,4 +145,5 @@ class EmployeeRepoTest {
     @Test
     void updateEmployeeFullGraph__whenChangingToOccupiedCubicle__thenThrowException() {
     }
+
 }

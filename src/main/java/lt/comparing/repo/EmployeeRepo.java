@@ -1,19 +1,19 @@
-package lt.comparing;
+package lt.comparing.repo;
 
 import lt.comparing.plainjdbc.entity.Employee;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface EmployeeRepo {
 
     Optional<Employee> getEmployee(long employeeId);
 
-    List<Employee> getEmployees();
+    Set<Employee> getEmployees();
 
     Optional<Employee> getEmployeeFullGraph(long employeeId);
 
-    List<Employee> getEmployeesFullGraph();
+    Set<Employee> getEmployeesFullGraph();
 
     void saveEmployeeFullGraph(Employee employee);
 

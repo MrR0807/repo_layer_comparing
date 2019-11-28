@@ -1,4 +1,4 @@
-package lt.comparing.plainjdbc;
+package lt.comparing.plainjdbc.repo;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

@@ -1,18 +1,15 @@
-package lt.comparing.plainjdbc;
+package lt.comparing.plainjdbc.repo;
 
-import lt.comparing.EmployeeRepo;
 import lt.comparing.plainjdbc.entity.*;
+import lt.comparing.repo.EmployeeRepo;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.Objects.isNull;
-import static lt.comparing.plainjdbc.EmployeeSQLStatements.*;
+import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.*;
 
 public class JdbcEmployeeRepo implements EmployeeRepo {
 
@@ -37,10 +34,10 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
     }
 
     @Override
-    public List<Employee> getEmployees() {
-        ActionWithPreparedStatement<List<Employee>> action = ps -> {
+    public Set<Employee> getEmployees() {
+        ActionWithPreparedStatement<Set<Employee>> action = ps -> {
             ResultSet resultSet = ps.executeQuery();
-            List<Employee> employees = new LinkedList<>();
+            Set<Employee> employees = new LinkedHashSet<>();
 
             while (resultSet.next()) {
                 var employee = toEmployee(resultSet);
@@ -60,45 +57,22 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
             ps.setLong(1, employeeId);
             ResultSet resultSet = ps.executeQuery();
 
-            Employee employee = null;
-            Cubicle cubicle = null;
-            Building building = null;
-
-            while (resultSet.next()) {
-                if (isNull(building)) {
-                    building = toBuilding(resultSet);
-                }
-                if (isNull(cubicle)) {
-                    cubicle = toCubicle(resultSet, building);
-                }
-
-                if (isNull(employee)) {
-                    employee = toEmployee(resultSet, cubicle);
-                }
-                employee.addProject(toProject(resultSet));
-            }
-
-            return employee;
+            return toEmployeeMap(resultSet).get(employeeId);
         };
 
         return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE_FULL_GRAPH, action));
     }
 
     @Override
-    public List<Employee> getEmployeesFullGraph() {
-        ActionWithPreparedStatement<List<Employee>> action = ps -> {
+    public Set<Employee> getEmployeesFullGraph() {
+        ActionWithPreparedStatement<Set<Employee>> action = ps -> {
             ResultSet resultSet = ps.executeQuery();
-            List<Employee> employees = new LinkedList<>();
+            Map<Long, Employee> employeeMap = toEmployeeMap(resultSet);
 
-            while (resultSet.next()) {
-                var employee = toEmployee(resultSet);
-                employees.add(employee);
-            }
-
-            return employees;
+            return new HashSet<>(employeeMap.values());
         };
 
-        return jdbcHelper.get(SELECT_ALL_EMPLOYEES_AND_PROJECTS, action);
+        return jdbcHelper.get(SELECT_ALL_EMPLOYEES_FULL_GRAPH, action);
     }
 
     @Override
@@ -123,6 +97,26 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
         var employeeType = EmployeeType.valueOf(resultSet.getString("e_employee_type"));
         var listOfProjects = new ArrayList<Project>();
         return new Employee(id, firstName, lastName, salary, employeeType, cubicle, listOfProjects);
+    }
+
+    private static Map<Long, Employee> toEmployeeMap(ResultSet resultSet) throws SQLException {
+        Map<Long, Employee> employeeMap = new LinkedHashMap<>();
+
+        while (resultSet.next()) {
+            var employeeId = resultSet.getLong("e_id");
+            Employee employee = employeeMap.get(employeeId);
+            if (isNull(employee)) {
+                employee = toEmployee(resultSet);
+                employeeMap.put(employee.getId(), employee);
+            }
+            if (isNull(employee.getCubicle())) {
+                var building = toBuilding(resultSet);
+                var cubicle = toCubicle(resultSet, building);
+                employee.setCubicle(cubicle);
+            }
+            employee.addProject(toProject(resultSet));
+        }
+        return employeeMap;
     }
 
     private static Project toProject(ResultSet resultSet) throws SQLException {
