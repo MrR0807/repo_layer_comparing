@@ -2,8 +2,9 @@ package lt.comparing.service;
 
 import lt.comparing.config.H2DataSource;
 import lt.comparing.exceptions.EmployeeNotFoundException;
+import lt.comparing.plainjdbc.entity.Building;
+import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
-import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.plainjdbc.repo.JdbcEmployeeRepo;
 import lt.comparing.plainjdbc.service.JdbcEmployeeService;
 import lt.comparing.utils.H2Launcher;
@@ -12,10 +13,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static lt.comparing.fixture.EmployeesFixture.*;
+import static lt.comparing.fixture.EmployeesFixture.defaultEmployeeWithCubicle;
+import static lt.comparing.fixture.EmployeesFixture.employeesWithFullGraph;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -50,7 +52,7 @@ class EmployeeServiceTest {
     }
 
     @Test
-    void getEmployee__whenEmployeeDoesNotExists__thenReturnEmptyOptional() {
+    void getEmployee__whenEmployeeDoesNotExists__thenThrowException() {
         assertThatThrownBy(() -> service.getEmployee(999))
                 .isInstanceOf(EmployeeNotFoundException.class)
                 .hasMessage("Employee with id 999 not found");
@@ -58,18 +60,14 @@ class EmployeeServiceTest {
 
     @Test
     void getEmployeeFullGraph() {
-        Employee expected = defaultEmployeeWithCubicle()
-                .withProjects(List.of(
-                        new Project(2001, "Super project"),
-                        new Project(2003, "Average project")))
-                .build();
+        Employee expected = defaultEmployeeWithCubicle().build();
 
         Employee result = service.getEmployeeFullGraph(1);
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualToIgnoringGivenFields(expected, "salary", "projects");
         assertThat(result.getSalary()).isEqualTo(expected.getSalary());
-        assertThat(result.getProjects()).containsOnlyElementsOf(expected.getProjects());
+        assertThat(result.getProjects()).containsExactlyElementsOf(expected.getProjects());
         assertThat(result.getCubicle()).isEqualToComparingFieldByField(expected.getCubicle());
     }
 
@@ -87,7 +85,7 @@ class EmployeeServiceTest {
 
     @Test
     void getEmployees() {
-        Set<Employee> expected = employees();
+        Set<Employee> expected = employeesWithFullGraph();
         Set<Employee> result = service.getEmployees();
 
         assertThat(result).isNotNull();
@@ -97,7 +95,9 @@ class EmployeeServiceTest {
 
     @Test
     void getEmployees__whenThereIsNoEmployees__thenReturnEmptyList() {
-
+        //given delete all employess
+        //when getEmployees
+        //then return emptyList
     }
 
     @Test
@@ -108,6 +108,36 @@ class EmployeeServiceTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(4);
         assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    void getEmployeesFullGraph__thenCubiclesAreTheSame() {
+        Set<Cubicle> expectedCubicles = extractCubicles(employeesWithFullGraph());
+        Set<Cubicle> resultCubicles = extractCubicles(service.getEmployeesFullGraph());
+
+        assertThat(resultCubicles).hasSize(4);
+        assertThat(expectedCubicles).containsExactlyInAnyOrderElementsOf(resultCubicles);
+    }
+
+    private Set<Cubicle> extractCubicles(Set<Employee> employees) {
+        return employees.stream()
+                .map(Employee::getCubicle)
+                .collect(Collectors.toSet());
+    }
+
+    @Test
+    void getEmployeesFullGraph__thenBuildingIsTheSame() {
+        Building expectedBuilding = extractBuilding(employeesWithFullGraph());
+        Building resultBuilding = extractBuilding(service.getEmployeesFullGraph());
+
+        assertThat(expectedBuilding).isEqualToComparingFieldByField(resultBuilding);
+    }
+
+    private Building extractBuilding(Set<Employee> employees) {
+        return employees.stream()
+                .map(Employee::getCubicle)
+                .map(Cubicle::getBuilding)
+                .findAny().orElseThrow();
     }
 
     @Test

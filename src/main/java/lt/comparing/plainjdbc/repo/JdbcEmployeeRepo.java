@@ -1,15 +1,28 @@
 package lt.comparing.plainjdbc.repo;
 
-import lt.comparing.plainjdbc.entity.*;
+import lt.comparing.plainjdbc.entity.Building;
+import lt.comparing.plainjdbc.entity.Cubicle;
+import lt.comparing.plainjdbc.entity.Employee;
+import lt.comparing.plainjdbc.entity.EmployeeType;
+import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.repo.EmployeeRepo;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Objects.isNull;
-import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.*;
+import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_ALL_EMPLOYEES_FULL_GRAPH;
+import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE;
+import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEES;
+import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE_FULL_GRAPH;
 
 public class JdbcEmployeeRepo implements EmployeeRepo {
 
@@ -85,20 +98,6 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
 
     }
 
-    private static Employee toEmployee(ResultSet resultSet) throws SQLException {
-        return toEmployee(resultSet, null);
-    }
-
-    private static Employee toEmployee(ResultSet resultSet, Cubicle cubicle) throws SQLException {
-        var id = resultSet.getLong("e_id");
-        var firstName = resultSet.getString("e_first_name");
-        var lastName = resultSet.getString("e_last_name");
-        var salary = resultSet.getBigDecimal("e_salary");
-        var employeeType = EmployeeType.valueOf(resultSet.getString("e_employee_type"));
-        var listOfProjects = new ArrayList<Project>();
-        return new Employee(id, firstName, lastName, salary, employeeType, cubicle, listOfProjects);
-    }
-
     private static Map<Long, Employee> toEmployeeMap(ResultSet resultSet) throws SQLException {
         Map<Long, Employee> employeeMap = new LinkedHashMap<>();
 
@@ -117,6 +116,16 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
             employee.addProject(toProject(resultSet));
         }
         return employeeMap;
+    }
+
+    private static Employee toEmployee(ResultSet resultSet) throws SQLException {
+        var id = resultSet.getLong("e_id");
+        var firstName = resultSet.getString("e_first_name");
+        var lastName = resultSet.getString("e_last_name");
+        var salary = resultSet.getBigDecimal("e_salary");
+        var employeeType = EmployeeType.valueOf(resultSet.getString("e_employee_type"));
+        var listOfProjects = new ArrayList<Project>();
+        return new Employee(id, firstName, lastName, salary, employeeType, null, listOfProjects);
     }
 
     private static Project toProject(ResultSet resultSet) throws SQLException {
