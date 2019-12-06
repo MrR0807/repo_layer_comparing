@@ -5,7 +5,6 @@ import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
-import lt.comparing.repo.EmployeeRepo;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -21,23 +20,19 @@ import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.INSERT_EMPLOYEE;
-import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.INSERT_INTO_EMPLOYEE_PROJECT;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_ALL_EMPLOYEES_FULL_GRAPH;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEES;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE_FULL_GRAPH;
 
-public class JdbcEmployeeRepo implements EmployeeRepo {
+public class JdbcEmployeeRepo {
 
     private final JdbcHelper jdbcHelper;
-    private final DataSource dataSource;
 
     public JdbcEmployeeRepo(DataSource dataSource) {
         this.jdbcHelper = new JdbcHelper(dataSource);
-        this.dataSource = dataSource;
     }
 
-    @Override
     public Optional<Employee> getEmployee(long employeeId) {
         Select<Employee> action = ps -> {
             ps.setLong(1, employeeId);
@@ -49,7 +44,6 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
         return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE, action));
     }
 
-    @Override
     public Set<Employee> getEmployees() {
         Select<Set<Employee>> action = ps -> {
             ResultSet resultSet = ps.executeQuery();
@@ -67,7 +61,6 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
         return jdbcHelper.get(SELECT_EMPLOYEES, action);
     }
 
-    @Override
     public Optional<Employee> getEmployeeFullGraph(long employeeId) {
         Select<Employee> action = ps -> {
             ps.setLong(1, employeeId);
@@ -79,7 +72,6 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
         return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE_FULL_GRAPH, action));
     }
 
-    @Override
     public Set<Employee> getEmployeesFullGraph() {
         Select<Set<Employee>> action = ps -> {
             ResultSet resultSet = ps.executeQuery();
@@ -91,8 +83,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
         return jdbcHelper.get(SELECT_ALL_EMPLOYEES_FULL_GRAPH, action);
     }
 
-    @Override
-    public long saveEmployeeFullGraph(Employee employee) {
+    public long saveEmployee(Employee employee) {
         InsertWithId<Employee> insertWithId = (ps, e) -> {
             ps.setString(1, e.getFirstName());
             ps.setString(2, e.getLastName());
@@ -106,16 +97,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
             return key;
         };
 
-        Insert<Employee> insertEmployeeProject = (ps, e) -> {
-            for (Project project : e.getProjects()) {
-                ps.setLong(1, e.getId());
-                ps.setLong(2, project.getId());
-                ps.executeUpdate();
-            }
-        };
-
         long employeeId = jdbcHelper.insert(INSERT_EMPLOYEE, insertWithId, employee);
-        jdbcHelper.insert(INSERT_INTO_EMPLOYEE_PROJECT, insertEmployeeProject, employee);
         return employeeId;
     }
 
@@ -129,8 +111,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
         }
     }
 
-    @Override
-    public void updateEmployeeFullGraph(Employee employee) {
+    public void updateEmployee(Employee employee) {
 
     }
 

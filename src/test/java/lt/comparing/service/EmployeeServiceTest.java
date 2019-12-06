@@ -9,6 +9,7 @@ import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.plainjdbc.repo.JdbcEmployeeRepo;
+import lt.comparing.plainjdbc.repo.JdbcProjectRepo;
 import lt.comparing.plainjdbc.service.JdbcEmployeeService;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
@@ -16,8 +17,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,7 +36,8 @@ class EmployeeServiceTest {
     @BeforeAll
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
-        service = new JdbcEmployeeService(new JdbcEmployeeRepo(H2DataSource.dataSource()));
+        DataSource dataSource = H2DataSource.dataSource();
+        service = new JdbcEmployeeService(new JdbcEmployeeRepo(dataSource), new JdbcProjectRepo(dataSource));
     }
 
     @BeforeEach
@@ -210,7 +212,8 @@ class EmployeeServiceTest {
                 .withProjects(List.of())
                 .build();
 
-        assertThatThrownBy(() -> service.saveEmployeeFullGraph(saveEmployee)).isInstanceOf(SQLException.class);
+        assertThatThrownBy(() -> service.saveEmployeeFullGraph(saveEmployee)).isInstanceOf(RuntimeException.class)
+                .hasMessage("Could not execute statement");
     }
 
     @Test

@@ -45,6 +45,4 @@ public class EmployeeSQLStatements {
     public static final String INSERT_INTO_EMPLOYEE_PROJECT = """
             INSERT INTO company.employee_project (employee_id, project_id)
             VALUES (?, ?)""";
-
-
 }
