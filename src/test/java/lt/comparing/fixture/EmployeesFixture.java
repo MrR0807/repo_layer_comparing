@@ -29,6 +29,10 @@ public class EmployeesFixture {
                 new Employee(4, "First4", "Last4", BigDecimal.valueOf(1000), EmployeeType.MANAGER, new Cubicle(1004, building), List.of(project2002)));
     }
 
+    private static Employee createEmployee(long id, EmployeeType employeeType, Cubicle cubicle, List<Project> projects) {
+        return new Employee(id, "First" + id, "Last" + id, BigDecimal.valueOf(1_000), employeeType, cubicle, projects);
+    }
+
     public static EmployeeBuilder defaultEmployeeWithCubicle() {
         return EmployeeBuilder.anEmployee()
                 .withId(1)

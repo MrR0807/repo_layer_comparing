@@ -1,6 +1,5 @@
 package lt.comparing.plainjdbc.entity;
 
-import java.util.List;
 import java.util.Objects;
 
 public class Building {
@@ -32,12 +31,14 @@ public class Building {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Building building = (Building) o;
-        return id == building.id;
+        return id == building.id &&
+                Objects.equals(name, building.name) &&
+                Objects.equals(address, building.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, name, address);
     }
 
     @Override

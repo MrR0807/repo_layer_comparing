@@ -38,8 +38,8 @@ public class JdbcEmployeeService implements EmployeeService {
     }
 
     @Override
-    public void saveEmployeeFullGraph(Employee employee) {
-
+    public long saveEmployeeFullGraph(Employee employee) {
+        return repo.saveEmployeeFullGraph(employee);
     }
 
     @Override

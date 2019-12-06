@@ -15,7 +15,7 @@ public interface EmployeeRepo {
 
     Set<Employee> getEmployeesFullGraph();
 
-    void saveEmployeeFullGraph(Employee employee);
+    long saveEmployeeFullGraph(Employee employee);
 
     void updateEmployeeFullGraph(Employee employee);
 }

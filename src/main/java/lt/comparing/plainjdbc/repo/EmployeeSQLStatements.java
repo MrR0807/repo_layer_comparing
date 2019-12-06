@@ -37,4 +37,14 @@ public class EmployeeSQLStatements {
             INNER JOIN company.project p ON ep.project_id = p.id
             INNER JOIN company.cubicle c ON e.cubicle_id = c.id
             INNER JOIN company.building b ON c.building_id = b.id""";
+
+    public static final String INSERT_EMPLOYEE = """
+            INSERT INTO company.employee (first_name, last_name, salary, employee_type, cubicle_id)
+            VALUES (?, ?, ?, ?, ?)""";
+
+    public static final String INSERT_INTO_EMPLOYEE_PROJECT = """
+            INSERT INTO company.employee_project (employee_id, project_id)
+            VALUES (?, ?)""";
+
+
 }

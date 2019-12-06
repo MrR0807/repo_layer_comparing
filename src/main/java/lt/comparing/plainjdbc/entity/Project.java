@@ -28,12 +28,12 @@ public class Project {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Project project = (Project) o;
-        return id == project.id;
+        return id == project.id && Objects.equals(projectName, project.projectName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, projectName);
     }
 
     @Override

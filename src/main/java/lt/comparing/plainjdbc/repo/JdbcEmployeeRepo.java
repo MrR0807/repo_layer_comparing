@@ -8,6 +8,7 @@ import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.repo.EmployeeRepo;
 
 import javax.sql.DataSource;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
+import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.INSERT_EMPLOYEE;
+import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.INSERT_INTO_EMPLOYEE_PROJECT;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_ALL_EMPLOYEES_FULL_GRAPH;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEES;
@@ -27,20 +30,20 @@ import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE_
 public class JdbcEmployeeRepo implements EmployeeRepo {
 
     private final JdbcHelper jdbcHelper;
+    private final DataSource dataSource;
 
     public JdbcEmployeeRepo(DataSource dataSource) {
         this.jdbcHelper = new JdbcHelper(dataSource);
+        this.dataSource = dataSource;
     }
 
     @Override
     public Optional<Employee> getEmployee(long employeeId) {
-        ActionWithPreparedStatement<Employee> action = ps -> {
+        Select<Employee> action = ps -> {
             ps.setLong(1, employeeId);
             ResultSet resultSet = ps.executeQuery();
 
-            return resultSet.next()
-                    ? toEmployee(resultSet)
-                    : null;
+            return resultSet.next() ? toEmployee(resultSet) : null;
         };
 
         return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE, action));
@@ -48,7 +51,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
 
     @Override
     public Set<Employee> getEmployees() {
-        ActionWithPreparedStatement<Set<Employee>> action = ps -> {
+        Select<Set<Employee>> action = ps -> {
             ResultSet resultSet = ps.executeQuery();
             Set<Employee> employees = new LinkedHashSet<>();
 
@@ -66,7 +69,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
 
     @Override
     public Optional<Employee> getEmployeeFullGraph(long employeeId) {
-        ActionWithPreparedStatement<Employee> action = ps -> {
+        Select<Employee> action = ps -> {
             ps.setLong(1, employeeId);
             ResultSet resultSet = ps.executeQuery();
 
@@ -78,7 +81,7 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
 
     @Override
     public Set<Employee> getEmployeesFullGraph() {
-        ActionWithPreparedStatement<Set<Employee>> action = ps -> {
+        Select<Set<Employee>> action = ps -> {
             ResultSet resultSet = ps.executeQuery();
             Map<Long, Employee> employeeMap = toEmployeeMap(resultSet);
 
@@ -89,8 +92,41 @@ public class JdbcEmployeeRepo implements EmployeeRepo {
     }
 
     @Override
-    public void saveEmployeeFullGraph(Employee employee) {
+    public long saveEmployeeFullGraph(Employee employee) {
+        InsertWithId<Employee> insertWithId = (ps, e) -> {
+            ps.setString(1, e.getFirstName());
+            ps.setString(2, e.getLastName());
+            ps.setBigDecimal(3, e.getSalary());
+            ps.setString(4, e.getEmployeeType().toString());
+            ps.setLong(5, e.getCubicle().getId());
+            ps.executeUpdate();
 
+            long key = getGeneratedKey(ps);
+            employee.setId(key);
+            return key;
+        };
+
+        Insert<Employee> insertEmployeeProject = (ps, e) -> {
+            for (Project project : e.getProjects()) {
+                ps.setLong(1, e.getId());
+                ps.setLong(2, project.getId());
+                ps.executeUpdate();
+            }
+        };
+
+        long employeeId = jdbcHelper.insert(INSERT_EMPLOYEE, insertWithId, employee);
+        jdbcHelper.insert(INSERT_INTO_EMPLOYEE_PROJECT, insertEmployeeProject, employee);
+        return employeeId;
+    }
+
+    private long getGeneratedKey(PreparedStatement ps) throws SQLException {
+        try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+            if (generatedKeys.next()) {
+                return generatedKeys.getInt(1);
+            } else {
+                throw new RuntimeException("Could not find generated key");
+            }
+        }
     }
 
     @Override

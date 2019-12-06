@@ -6,7 +6,8 @@ VALUES
 (1001, 1),
 (1002, 1),
 (1003, 1),
-(1004, 1);
+(1004, 1),
+(1005, 1);
 
 INSERT INTO company.employee (id, first_name, last_name, salary, employee_type, cubicle_id)
 VALUES
