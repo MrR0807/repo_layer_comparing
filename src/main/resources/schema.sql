@@ -1,7 +1,7 @@
 CREATE SCHEMA company;
 
 CREATE TABLE company.employee (
-id                  BIGINT          NOT NULL auto_increment,
+id                  BIGINT          NOT NULL IDENTITY (1,1),
 first_name          VARCHAR (255)   NOT NULL,
 last_name           VARCHAR (255)   NOT NULL,
 salary              DECIMAL (19, 2) NOT NULL,
@@ -12,7 +12,7 @@ CONSTRAINT PK__employee_id PRIMARY KEY (id)
 );
 
 CREATE TABLE company.project (
-id              BIGINT        NOT NULL auto_increment,
+id              BIGINT        NOT NULL IDENTITY (2000, 1),
 project_name    VARCHAR (255) NOT NULL,
 
 CONSTRAINT PK__project_id PRIMARY KEY (id)
@@ -26,14 +26,14 @@ CONSTRAINT PK__employee_id__project_id PRIMARY KEY (employee_id, project_id)
 );
 
 CREATE TABLE company.cubicle (
-id          BIGINT NOT NULL auto_increment,
+id          BIGINT NOT NULL IDENTITY (1000, 1),
 building_id BIGINT NOT NULL,
 
 CONSTRAINT PK__cubicle_id PRIMARY KEY (id)
 );
 
 CREATE TABLE company.building(
-id          BIGINT NOT NULL auto_increment,
+id          BIGINT NOT NULL IDENTITY (1,1),
 name        VARCHAR (255) NOT NULL,
 address     VARCHAR (255) NOT NULL,
 

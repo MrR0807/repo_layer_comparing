@@ -84,7 +84,7 @@ public class JdbcEmployeeRepo {
     }
 
     public long saveEmployee(Employee employee) {
-        InsertWithId<Employee> insertWithId = (ps, e) -> {
+        InsertReturning<Employee, Long> insertReturning = (ps, e) -> {
             ps.setString(1, e.getFirstName());
             ps.setString(2, e.getLastName());
             ps.setBigDecimal(3, e.getSalary());
@@ -97,8 +97,7 @@ public class JdbcEmployeeRepo {
             return key;
         };
 
-        long employeeId = jdbcHelper.insert(INSERT_EMPLOYEE, insertWithId, employee);
-        return employeeId;
+        return jdbcHelper.insert(INSERT_EMPLOYEE, insertReturning, employee);
     }
 
     private long getGeneratedKey(PreparedStatement ps) throws SQLException {

@@ -18,15 +18,15 @@ public class EmployeesFixture {
 
     public static Set<Employee> employeesWithFullGraph() {
         Building building = new Building(1, "Big Building", "Address 1");
-        Project project2001 = new Project(2001, "Super project");
-        Project project2002 = new Project(2002, "Terrible project");
-        Project project2003 = new Project(2003, "Average project");
+        Project project2000 = ProjectFixture.project2000();
+        Project project2001 = ProjectFixture.project2001();
+        Project project2002 = ProjectFixture.project2002();
 
         return Set.of(
-                new Employee(1, "First1", "Last1", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, new Cubicle(1001, building), List.of(project2001, project2003)),
-                new Employee(2, "First2", "Last2", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, new Cubicle(1002, building), List.of(project2001)),
-                new Employee(3, "First3", "Last3", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, new Cubicle(1003, building), List.of(project2002)),
-                new Employee(4, "First4", "Last4", BigDecimal.valueOf(1000), EmployeeType.MANAGER, new Cubicle(1004, building), List.of(project2002)));
+                new Employee(1, "First1", "Last1", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, new Cubicle(1000, building), List.of(project2000, project2002)),
+                new Employee(2, "First2", "Last2", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, new Cubicle(1001, building), List.of(project2000)),
+                new Employee(3, "First3", "Last3", BigDecimal.valueOf(1000), EmployeeType.EMPLOYEE, new Cubicle(1002, building), List.of(project2001)),
+                new Employee(4, "First4", "Last4", BigDecimal.valueOf(1000), EmployeeType.MANAGER, new Cubicle(1003, building), List.of(project2001)));
     }
 
     private static Employee createEmployee(long id, EmployeeType employeeType, Cubicle cubicle, List<Project> projects) {
@@ -40,7 +40,7 @@ public class EmployeesFixture {
                 .withLastName("Last1")
                 .withSalary(BigDecimal.valueOf(1000.00).setScale(2, RoundingMode.HALF_UP))
                 .withEmployeeType(EmployeeType.EMPLOYEE)
-                .withCubicle(new Cubicle(1001, new Building(1, "Big Building", "Address 1")))
-                .withProjects(List.of(new Project(2001, "Super project"), new Project(2003, "Average project")));
+                .withCubicle(new Cubicle(1000, new Building(1, "Big Building", "Address 1")))
+                .withProjects(List.of(ProjectFixture.project2000(), ProjectFixture.project2002()));
     }
 }

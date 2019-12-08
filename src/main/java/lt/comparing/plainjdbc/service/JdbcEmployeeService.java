@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 public class JdbcEmployeeService implements EmployeeService {
 
     private final JdbcEmployeeRepo employeeRepoe;
-    private final JdbcProjectRepo projectRepo;
+    private final JdbcProjectService projectService;
 
-    public JdbcEmployeeService(JdbcEmployeeRepo employeeRepoe, JdbcProjectRepo projectRepo) {
+    public JdbcEmployeeService(JdbcEmployeeRepo employeeRepoe, JdbcProjectService projectService) {
         this.employeeRepoe = employeeRepoe;
-        this.projectRepo = projectRepo;
+        this.projectService = projectService;
     }
 
     @Override
@@ -45,14 +45,19 @@ public class JdbcEmployeeService implements EmployeeService {
 
     @Override
     public long saveEmployeeFullGraph(Employee employee) {
-        List<Long> projectIds = employee.getProjects().stream()
-                .map(Project::getId)
-                .collect(Collectors.toList());
-        List<Project> projects = projectRepo.selectIn(projectIds);
+        List<Long> projectIds = getEmployeeProjectIds(employee);
+        List<Project> projects = projectService.selectIn(projectIds);
 
+        //Does cubicle exists else throw Exception
 
 
         return employeeRepoe.saveEmployee(employee);
+    }
+
+    private List<Long> getEmployeeProjectIds(Employee employee) {
+        return employee.getProjects().stream()
+                    .map(Project::getId)
+                    .collect(Collectors.toList());
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class JdbcProjectRepo {
@@ -23,7 +24,7 @@ public class JdbcProjectRepo {
             FROM company.project p
             WHERE p.id IN (%s)""";
 
-    public List<Project> selectIn(List<Long> projectIds) {
+    public List<Project> selectIn(Collection<Long> projectIds) {
         String sql = String.format(SELECT_ALL_PROJECTS_IN, preparePlaceHolders(projectIds.size()));
         List<Project> projects = new ArrayList<>();
 
@@ -60,6 +61,9 @@ public class JdbcProjectRepo {
         }
     }
 
+    public List<Long> save(List<Project> projects) {
+        return List.of();
+    }
 
 
     //

@@ -11,6 +11,7 @@ import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.plainjdbc.repo.JdbcEmployeeRepo;
 import lt.comparing.plainjdbc.repo.JdbcProjectRepo;
 import lt.comparing.plainjdbc.service.JdbcEmployeeService;
+import lt.comparing.plainjdbc.service.JdbcProjectService;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +38,8 @@ class EmployeeServiceTest {
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
         DataSource dataSource = H2DataSource.dataSource();
-        service = new JdbcEmployeeService(new JdbcEmployeeRepo(dataSource), new JdbcProjectRepo(dataSource));
+        JdbcProjectService projectService = new JdbcProjectService(new JdbcProjectRepo(dataSource));
+        service = new JdbcEmployeeService(new JdbcEmployeeRepo(dataSource), projectService);
     }
 
     @BeforeEach

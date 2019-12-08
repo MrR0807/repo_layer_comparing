@@ -26,7 +26,7 @@ public class JdbcHelper {
         }
     }
 
-    public <T> long insert(String insert, InsertWithId<T> function, T t) {
+    public <T, R> R insert(String insert, InsertReturning<T, R> function, T t) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
 
