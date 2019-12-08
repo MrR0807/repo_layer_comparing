@@ -1,6 +1,9 @@
-package lt.comparing.plainjdbc.repo;
+package lt.comparing.plainjdbc.repo.project;
 
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.JdbcHelper;
+import lt.comparing.plainjdbc.repo.sqlfunction.Insert;
+import lt.comparing.plainjdbc.repo.sqlfunction.Select;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -9,7 +12,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static lt.comparing.plainjdbc.repo.project.ProjectSQLStatements.*;
 
 public class JdbcProjectRepo {
 
@@ -18,20 +22,6 @@ public class JdbcProjectRepo {
     public JdbcProjectRepo(DataSource dataSource) {
         jdbcHelper = new JdbcHelper(dataSource);
     }
-
-    private static final String SELECT_ALL_PROJECTS_IN = """
-            SELECT p.id p_id, p.project_name p_project_name
-            FROM company.project p
-            WHERE p.id IN (%s)""";
-
-    private static final String SELECT_ALL_PROJECTS_IN_PROJECT_NAME = """
-            SELECT p.id p_id, p.project_name p_project_name
-            FROM company.project p
-            WHERE p.project_name IN (%s)""";
-
-    private static final String INSERT_ALL_PROJECTS = """
-            INSERT INTO company.project (project_name)
-            VALUES %s""";
 
     public List<Project> selectIn(Collection<Long> projectIds) {
         return selectIn(projectIds, SELECT_ALL_PROJECTS_IN);
@@ -46,12 +36,12 @@ public class JdbcProjectRepo {
 
         Select<List<Project>> selectProject = ps -> {
             setValues(ps, valuesIn.toArray());
-            ResultSet results = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
             List<Project> projects = new ArrayList<>();
 
-            while (results.next()) {
-                var projectId = results.getLong("p_id");
-                var projectName = results.getString("p_project_name");
+            while (rs.next()) {
+                var projectId = rs.getLong("p_id");
+                var projectName = rs.getString("p_project_name");
                 projects.add(new Project(projectId, projectName));
             }
             return projects;
@@ -64,12 +54,12 @@ public class JdbcProjectRepo {
         return preparePlaceHolders(size, "", ",");
     }
 
-    private static String preparePlaceHolders(int size, String prefix, String posfix) {
+    private static String preparePlaceHolders(int size, String prefix, String postfix) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < size; i++) {
             sb.append(prefix);
             sb.append("?");
-            sb.append(posfix);
+            sb.append(postfix);
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();

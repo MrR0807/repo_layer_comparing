@@ -1,4 +1,4 @@
-package lt.comparing.plainjdbc.repo;
+package lt.comparing.plainjdbc.repo.employeeproject;
 
 import javax.sql.DataSource;
 

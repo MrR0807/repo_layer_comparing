@@ -4,6 +4,7 @@ import lt.comparing.config.H2DataSource;
 import lt.comparing.exceptions.ProjectExistsException;
 import lt.comparing.fixture.ProjectFixture;
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.project.JdbcProjectRepo;
 import lt.comparing.plainjdbc.service.JdbcProjectService;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
@@ -95,5 +96,36 @@ class JdbcProjectServiceTest {
         assertThatThrownBy(() -> projectService.saveProjects(projectsToPersist))
                 .isInstanceOf(ProjectExistsException.class)
                 .hasMessage("Projects with names: 'Super project, Terrible project' already exists");
+    }
+
+    @Test
+    void saveProjects__whenGivenEmptyList() {
+        List<Project> result = projectService.saveProjects(List.of());
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void saveProjectsDiff__whenAllExists__thenPersistNone() {
+        List<Project> expected = ProjectFixture.projects();
+        List<Project> result = projectService.saveProjectsDiff(expected);
+
+        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    void saveProjectsDiff__whenNonExists__thenPersistAll() {
+        List<Project> expected = ProjectFixture.nonExistingProjects();
+        String[] expectedName = expected.stream().map(Project::getProjectName).toArray(String[]::new);
+        List<Project> result = projectService.saveProjectsDiff(expected);
+
+        assertThat(result).extracting("projectName").containsExactly(expectedName);
+        assertThat(result).extracting("id").containsExactly(2003L, 2004L, 2005L);
+    }
+
+    @Test
+    void saveProjectsDiff__whenSomeExists__thenPersistOnlyThoseWhichDoNotExists() {
+
     }
 }

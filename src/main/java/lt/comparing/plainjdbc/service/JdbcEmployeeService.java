@@ -3,8 +3,7 @@ package lt.comparing.plainjdbc.service;
 import lt.comparing.exceptions.EmployeeNotFoundException;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.Project;
-import lt.comparing.plainjdbc.repo.JdbcEmployeeRepo;
-import lt.comparing.plainjdbc.repo.JdbcProjectRepo;
+import lt.comparing.plainjdbc.repo.employee.JdbcEmployeeRepo;
 import lt.comparing.service.EmployeeService;
 
 import java.util.List;
@@ -47,6 +46,7 @@ public class JdbcEmployeeService implements EmployeeService {
     public long saveEmployeeFullGraph(Employee employee) {
         List<Long> projectIds = getEmployeeProjectIds(employee);
         List<Project> projects = projectService.selectIn(projectIds);
+
 
         //Does cubicle exists else throw Exception
 

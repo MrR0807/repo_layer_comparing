@@ -1,5 +1,9 @@
 package lt.comparing.plainjdbc.repo;
 
+import lt.comparing.plainjdbc.repo.sqlfunction.Insert;
+import lt.comparing.plainjdbc.repo.sqlfunction.InsertReturning;
+import lt.comparing.plainjdbc.repo.sqlfunction.Select;
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

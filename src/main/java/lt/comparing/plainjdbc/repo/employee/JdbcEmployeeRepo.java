@@ -1,23 +1,25 @@
-package lt.comparing.plainjdbc.repo;
+package lt.comparing.plainjdbc.repo.employee;
 
 import lt.comparing.plainjdbc.entity.Building;
 import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.JdbcHelper;
+import lt.comparing.plainjdbc.repo.sqlfunction.Insert;
+import lt.comparing.plainjdbc.repo.sqlfunction.Select;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
 import static java.util.Objects.isNull;
-import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.INSERT_EMPLOYEE;
-import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_ALL_EMPLOYEES_FULL_GRAPH;
-import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE;
-import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEES;
-import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.SELECT_EMPLOYEE_FULL_GRAPH;
+import static lt.comparing.plainjdbc.repo.employee.EmployeeSQLStatements.INSERT_EMPLOYEE;
+import static lt.comparing.plainjdbc.repo.employee.EmployeeSQLStatements.SELECT_ALL_EMPLOYEES_FULL_GRAPH;
+import static lt.comparing.plainjdbc.repo.employee.EmployeeSQLStatements.SELECT_EMPLOYEE;
+import static lt.comparing.plainjdbc.repo.employee.EmployeeSQLStatements.SELECT_EMPLOYEES;
+import static lt.comparing.plainjdbc.repo.employee.EmployeeSQLStatements.SELECT_EMPLOYEE_FULL_GRAPH;
 
 public class JdbcEmployeeRepo {
 

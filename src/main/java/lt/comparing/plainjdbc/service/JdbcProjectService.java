@@ -2,10 +2,12 @@ package lt.comparing.plainjdbc.service;
 
 import lt.comparing.exceptions.ProjectExistsException;
 import lt.comparing.plainjdbc.entity.Project;
-import lt.comparing.plainjdbc.repo.JdbcProjectRepo;
+import lt.comparing.plainjdbc.repo.project.JdbcProjectRepo;
 import org.apache.commons.collections4.ListUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,16 @@ public class JdbcProjectService {
 
     public List<Project> selectInProjectNames(Collection<String> projectNames) {
         return projectRepo.selectInProjectNames(projectNames);
+    }
+
+    public List<Project> saveProjectsDiff(List<Project> projects) {
+        List<Project> foundProject = selectInProjectNames(getProjectNames(projects));
+        List<Project> projectsToPersist = new ArrayList<>(projects);
+        projectsToPersist.removeIf(foundProject::contains);
+
+        List<Project> result = saveProjects(projectsToPersist);
+        result.addAll(foundProject);
+        return result;
     }
 
     public List<Project> saveProjects(List<Project> projects) {
