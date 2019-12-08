@@ -85,7 +85,7 @@ public class JdbcProjectRepo {
         String formattedInsert = String.format(INSERT_ALL_PROJECTS,
                 preparePlaceHolders(projects.size(), "(", "),"));
 
-        InsertReturning<List<Project>, List<Long>> insert = (ps, projectList) -> {
+        Insert<List<Project>> insert = (ps, projectList) -> {
 
             Object[] projectNames = projectList.stream()
                     .map(Project::getProjectName).toArray();
@@ -96,16 +96,9 @@ public class JdbcProjectRepo {
             if (projects.size() != insertCount) {
                 throw new RuntimeException("Something went wrong inserting projects");
             }
-
-            ResultSet rs = ps.getGeneratedKeys();
-            List<Long> generatedKeys = new ArrayList<>();
-            while (rs.next()) {
-                generatedKeys.add(rs.getLong(1));
-            }
-            return generatedKeys;
         };
 
-        List<Long> generatedKeys = jdbcHelper.insert(formattedInsert, insert, projects);
+        List<Long> generatedKeys = jdbcHelper.insertReturnGeneratedKeys(formattedInsert, insert, projects);
 
         return selectIn(generatedKeys);
     }

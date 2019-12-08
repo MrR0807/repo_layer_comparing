@@ -41,8 +41,4 @@ public class EmployeeSQLStatements {
     public static final String INSERT_EMPLOYEE = """
             INSERT INTO company.employee (first_name, last_name, salary, employee_type, cubicle_id)
             VALUES (?, ?, ?, ?, ?)""";
-
-    public static final String INSERT_INTO_EMPLOYEE_PROJECT = """
-            INSERT INTO company.employee_project (employee_id, project_id)
-            VALUES (?, ?)""";
 }

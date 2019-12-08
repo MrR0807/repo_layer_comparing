@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JdbcHelper {
 
@@ -34,6 +36,29 @@ public class JdbcHelper {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not execute statement");
+        }
+    }
+
+    public <T> List<Long> insertReturnGeneratedKeys(String insert, Insert<T> function, T t) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
+
+            function.action(ps, t);
+
+            return getGeneratedLeys(ps);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not execute statement");
+        }
+    }
+
+    private static List<Long> getGeneratedLeys(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            List<Long> generatedKeys = new ArrayList<>();
+            while (rs.next()) {
+                generatedKeys.add(rs.getLong(1));
+            }
+            return generatedKeys;
         }
     }
 

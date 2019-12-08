@@ -10,13 +10,7 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 import static lt.comparing.plainjdbc.repo.EmployeeSQLStatements.INSERT_EMPLOYEE;
@@ -84,30 +78,17 @@ public class JdbcEmployeeRepo {
     }
 
     public long saveEmployee(Employee employee) {
-        InsertReturning<Employee, Long> insertReturning = (ps, e) -> {
+        Insert<Employee> insertReturning = (ps, e) -> {
             ps.setString(1, e.getFirstName());
             ps.setString(2, e.getLastName());
             ps.setBigDecimal(3, e.getSalary());
             ps.setString(4, e.getEmployeeType().toString());
             ps.setLong(5, e.getCubicle().getId());
             ps.executeUpdate();
-
-            long key = getGeneratedKey(ps);
-            employee.setId(key);
-            return key;
         };
 
-        return jdbcHelper.insert(INSERT_EMPLOYEE, insertReturning, employee);
-    }
-
-    private long getGeneratedKey(PreparedStatement ps) throws SQLException {
-        try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-            if (generatedKeys.next()) {
-                return generatedKeys.getInt(1);
-            } else {
-                throw new RuntimeException("Could not find generated key");
-            }
-        }
+        List<Long> generatedKeys = jdbcHelper.insertReturnGeneratedKeys(INSERT_EMPLOYEE, insertReturning, employee);
+        return generatedKeys.get(0);
     }
 
     public void updateEmployee(Employee employee) {
