@@ -13,26 +13,37 @@ import java.util.List;
 
 public class JdbcProjectRepo {
 
-    private final DataSource dataSource;
+    private final JdbcHelper jdbcHelper;
 
     public JdbcProjectRepo(DataSource dataSource) {
-        this.dataSource = dataSource;
+        jdbcHelper = new JdbcHelper(dataSource);
     }
 
-    public static final String SELECT_ALL_PROJECTS_IN = """
+    private static final String SELECT_ALL_PROJECTS_IN = """
             SELECT p.id p_id, p.project_name p_project_name
             FROM company.project p
             WHERE p.id IN (%s)""";
 
+    private static final String SELECT_ALL_PROJECTS_IN_PROJECT_NAME = """
+            SELECT p.id p_id, p.project_name p_project_name
+            FROM company.project p
+            WHERE p.project_name IN (%s)""";
+
     public List<Project> selectIn(Collection<Long> projectIds) {
-        String sql = String.format(SELECT_ALL_PROJECTS_IN, preparePlaceHolders(projectIds.size()));
-        List<Project> projects = new ArrayList<>();
+        return selectIn(projectIds, SELECT_ALL_PROJECTS_IN);
+    }
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    public List<Project> selectInProjectNames(Collection<String> projectNames) {
+        return selectIn(projectNames, SELECT_ALL_PROJECTS_IN_PROJECT_NAME);
+    }
 
-            setValues(ps, projectIds.toArray());
+    private List<Project> selectIn(Collection<?> valuesIn, String selectSql) {
+        String sql = String.format(selectSql, preparePlaceHolders(valuesIn.size()));
+
+        Select<List<Project>> selectProject = ps -> {
+            setValues(ps, valuesIn.toArray());
             ResultSet results = ps.executeQuery();
+            List<Project> projects = new ArrayList<>();
 
             while (results.next()) {
                 var projectId = results.getLong("p_id");
@@ -40,10 +51,9 @@ public class JdbcProjectRepo {
                 projects.add(new Project(projectId, projectName));
             }
             return projects;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not execute statement");
-        }
+        };
+
+        return jdbcHelper.get(sql, selectProject);
     }
 
     private static String preparePlaceHolders(int size) {
@@ -55,7 +65,7 @@ public class JdbcProjectRepo {
         return sb.toString();
     }
 
-    public static void setValues(PreparedStatement preparedStatement, Object... values) throws SQLException {
+    private static void setValues(PreparedStatement preparedStatement, Object... values) throws SQLException {
         for (int i = 0; i < values.length; i++) {
             preparedStatement.setObject(i + 1, values[i]);
         }

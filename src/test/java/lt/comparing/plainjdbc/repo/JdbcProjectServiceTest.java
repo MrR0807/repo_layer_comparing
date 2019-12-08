@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +40,7 @@ class JdbcProjectServiceTest {
 
     @Test
     void selectIn() {
-        List<Project> result = projectService.selectIn(List.of(2001L, 2002L, 2003L));
+        List<Project> result = projectService.selectIn(List.of(2000L, 2001L, 2002L));
         List<Project> expected = ProjectFixture.projects();
 
         assertThat(result).hasSize(3);
@@ -52,6 +53,22 @@ class JdbcProjectServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void selectInProjectNames() {
+        List<Project> expected = List.of(ProjectFixture.project2000(), ProjectFixture.project2001());
+        List<String> projectNames = expected.stream().map(Project::getProjectName).collect(Collectors.toList());
+        List<Project> result = projectService.selectInProjectNames(projectNames);
+
+
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    void selectInProjectNames__whenNothingIsFound__thenReturnEmptyArray() {
+
     }
 
     @Test

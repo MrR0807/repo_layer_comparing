@@ -5,8 +5,6 @@ import lt.comparing.plainjdbc.repo.JdbcProjectRepo;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class JdbcProjectService {
 
@@ -19,6 +17,12 @@ public class JdbcProjectService {
     public List<Project> selectIn(Collection<Long> projectIds) {
         return projectRepo.selectIn(projectIds);
     }
+
+    public List<Project> selectInProjectNames(Collection<String> projectNames) {
+        return projectRepo.selectInProjectNames(projectNames);
+    }
+
+
 
     public List<Project> saveProjects(List<Project> projects) {
         return null;
