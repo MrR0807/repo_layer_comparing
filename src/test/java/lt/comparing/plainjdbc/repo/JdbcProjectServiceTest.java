@@ -1,6 +1,7 @@
 package lt.comparing.plainjdbc.repo;
 
 import lt.comparing.config.H2DataSource;
+import lt.comparing.exceptions.ProjectExistsException;
 import lt.comparing.fixture.ProjectFixture;
 import lt.comparing.plainjdbc.entity.Project;
 import lt.comparing.plainjdbc.service.JdbcProjectService;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JdbcProjectServiceTest {
 
@@ -61,27 +63,37 @@ class JdbcProjectServiceTest {
         List<String> projectNames = expected.stream().map(Project::getProjectName).collect(Collectors.toList());
         List<Project> result = projectService.selectInProjectNames(projectNames);
 
-
         assertThat(result).hasSize(2);
         assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     @Test
     void selectInProjectNames__whenNothingIsFound__thenReturnEmptyArray() {
+        List<Project> result = projectService.selectInProjectNames(List.of("Test1", "Test2"));
 
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(0);
     }
 
     @Test
     void saveProjects() {
+        //given
         List<Project> projectsToPersist = ProjectFixture.nonExistingProjects();
-
-        projectService.saveProjects(projectsToPersist);
+        String[] expectedName = projectsToPersist.stream().map(Project::getProjectName).toArray(String[]::new);
+        //when
+        List<Project> result = projectService.saveProjects(projectsToPersist);
+        //then
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting("id").containsExactly(2003L, 2004L, 2005L);
+        assertThat(result).extracting("projectName").containsExactly(expectedName);
     }
 
     @Test
     void saveProjects__whenAlreadyExists__throwProjectExistsException() {
+        List<Project> projectsToPersist = List.of(ProjectFixture.project2000(), ProjectFixture.project2001());
 
+        assertThatThrownBy(() -> projectService.saveProjects(projectsToPersist))
+                .isInstanceOf(ProjectExistsException.class)
+                .hasMessage("Projects with names: 'Super project, Terrible project' already exists");
     }
-
-
 }

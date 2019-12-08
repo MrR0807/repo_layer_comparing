@@ -41,7 +41,7 @@ public class JdbcEmployeeRepo {
             return resultSet.next() ? toEmployee(resultSet) : null;
         };
 
-        return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE, action));
+        return Optional.ofNullable(jdbcHelper.select(SELECT_EMPLOYEE, action));
     }
 
     public Set<Employee> getEmployees() {
@@ -58,7 +58,7 @@ public class JdbcEmployeeRepo {
         };
 
 
-        return jdbcHelper.get(SELECT_EMPLOYEES, action);
+        return jdbcHelper.select(SELECT_EMPLOYEES, action);
     }
 
     public Optional<Employee> getEmployeeFullGraph(long employeeId) {
@@ -69,7 +69,7 @@ public class JdbcEmployeeRepo {
             return toEmployeeMap(resultSet).get(employeeId);
         };
 
-        return Optional.ofNullable(jdbcHelper.get(SELECT_EMPLOYEE_FULL_GRAPH, action));
+        return Optional.ofNullable(jdbcHelper.select(SELECT_EMPLOYEE_FULL_GRAPH, action));
     }
 
     public Set<Employee> getEmployeesFullGraph() {
@@ -80,7 +80,7 @@ public class JdbcEmployeeRepo {
             return new HashSet<>(employeeMap.values());
         };
 
-        return jdbcHelper.get(SELECT_ALL_EMPLOYEES_FULL_GRAPH, action);
+        return jdbcHelper.select(SELECT_ALL_EMPLOYEES_FULL_GRAPH, action);
     }
 
     public long saveEmployee(Employee employee) {

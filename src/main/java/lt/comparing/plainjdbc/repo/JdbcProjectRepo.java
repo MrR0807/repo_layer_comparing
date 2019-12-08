@@ -3,13 +3,13 @@ package lt.comparing.plainjdbc.repo;
 import lt.comparing.plainjdbc.entity.Project;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class JdbcProjectRepo {
 
@@ -28,6 +28,10 @@ public class JdbcProjectRepo {
             SELECT p.id p_id, p.project_name p_project_name
             FROM company.project p
             WHERE p.project_name IN (%s)""";
+
+    private static final String INSERT_ALL_PROJECTS = """
+            INSERT INTO company.project (project_name)
+            VALUES %s""";
 
     public List<Project> selectIn(Collection<Long> projectIds) {
         return selectIn(projectIds, SELECT_ALL_PROJECTS_IN);
@@ -53,13 +57,19 @@ public class JdbcProjectRepo {
             return projects;
         };
 
-        return jdbcHelper.get(sql, selectProject);
+        return jdbcHelper.select(sql, selectProject);
     }
 
     private static String preparePlaceHolders(int size) {
+        return preparePlaceHolders(size, "", ",");
+    }
+
+    private static String preparePlaceHolders(int size, String prefix, String posfix) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < size; i++) {
-            sb.append("?,");
+            sb.append(prefix);
+            sb.append("?");
+            sb.append(posfix);
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
@@ -71,20 +81,32 @@ public class JdbcProjectRepo {
         }
     }
 
-    public List<Long> save(List<Project> projects) {
-        return List.of();
+    public List<Project> save(List<Project> projects) {
+        String formattedInsert = String.format(INSERT_ALL_PROJECTS,
+                preparePlaceHolders(projects.size(), "(", "),"));
+
+        InsertReturning<List<Project>, List<Long>> insert = (ps, projectList) -> {
+
+            Object[] projectNames = projectList.stream()
+                    .map(Project::getProjectName).toArray();
+            setValues(ps, projectNames);
+
+            int insertCount = ps.executeUpdate();
+
+            if (projects.size() != insertCount) {
+                throw new RuntimeException("Something went wrong inserting projects");
+            }
+
+            ResultSet rs = ps.getGeneratedKeys();
+            List<Long> generatedKeys = new ArrayList<>();
+            while (rs.next()) {
+                generatedKeys.add(rs.getLong(1));
+            }
+            return generatedKeys;
+        };
+
+        List<Long> generatedKeys = jdbcHelper.insert(formattedInsert, insert, projects);
+
+        return selectIn(generatedKeys);
     }
-
-
-    //
-//    jdbcHelper.insert(INSERT_INTO_EMPLOYEE_PROJECT, insertEmployeeProject, employee);
-//
-//
-//    Insert<Employee> insertEmployeeProject = (ps, e) -> {
-//        for (Project project : e.getProjects()) {
-//            ps.setLong(1, e.getId());
-//            ps.setLong(2, project.getId());
-//            ps.executeUpdate();
-//        }
-//    };
 }

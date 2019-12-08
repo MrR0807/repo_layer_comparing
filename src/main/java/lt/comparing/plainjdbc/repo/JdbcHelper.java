@@ -15,7 +15,7 @@ public class JdbcHelper {
         this.dataSource = dataSource;
     }
 
-    public <T> T get(String select, Select<T> function) {
+    public <T> T select(String select, Select<T> function) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(select)) {
 
