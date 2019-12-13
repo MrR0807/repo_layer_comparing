@@ -8,7 +8,6 @@ import lt.comparing.service.EmployeeService;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class JdbcEmployeeService implements EmployeeService {
 
@@ -44,20 +43,14 @@ public class JdbcEmployeeService implements EmployeeService {
 
     @Override
     public long saveEmployeeFullGraph(Employee employee) {
-        List<Long> projectIds = getEmployeeProjectIds(employee);
-        List<Project> projects = projectService.selectIn(projectIds);
+        List<Project> persistedProjects = projectService.saveProjectsDiff(employee.getProjects());
+
 
 
         //Does cubicle exists else throw Exception
 
 
         return employeeRepoe.saveEmployee(employee);
-    }
-
-    private List<Long> getEmployeeProjectIds(Employee employee) {
-        return employee.getProjects().stream()
-                    .map(Project::getId)
-                    .collect(Collectors.toList());
     }
 
     @Override

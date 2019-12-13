@@ -32,6 +32,10 @@ public class JdbcProjectRepo {
     }
 
     private List<Project> selectIn(Collection<?> valuesIn, String selectSql) {
+        if (valuesIn.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         String sql = String.format(selectSql, preparePlaceHolders(valuesIn.size()));
 
         Select<List<Project>> selectProject = ps -> {
@@ -72,11 +76,13 @@ public class JdbcProjectRepo {
     }
 
     public List<Project> save(List<Project> projects) {
-        String formattedInsert = String.format(INSERT_ALL_PROJECTS,
-                preparePlaceHolders(projects.size(), "(", "),"));
+        if (projects.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        String formattedInsert = String.format(INSERT_ALL_PROJECTS, preparePlaceHolders(projects.size(), "(", "),"));
 
         Insert<List<Project>> insert = (ps, projectList) -> {
-
             Object[] projectNames = projectList.stream()
                     .map(Project::getProjectName).toArray();
             setValues(ps, projectNames);

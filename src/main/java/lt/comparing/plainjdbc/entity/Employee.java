@@ -13,12 +13,13 @@ public class Employee {
     private BigDecimal salary;
     private EmployeeType employeeType;
     private Cubicle cubicle;
-    private List<Project> projects;
+    private List<Project> projects = new ArrayList<>();
 
     public Employee() {
     }
 
-    public Employee(long id, String firstName, String lastName, BigDecimal salary, EmployeeType employeeType, Cubicle cubicle, List<Project> projects) {
+    public Employee(long id, String firstName, String lastName, BigDecimal salary, EmployeeType employeeType, Cubicle cubicle,
+                    List<Project> projects) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

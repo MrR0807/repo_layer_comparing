@@ -219,6 +219,18 @@ class EmployeeServiceTest {
     }
 
     @Test
+    void saveEmployeeFullGraph__whenPersistingNewEmployeeWithNewProjectsAndEmployeeInsertFails__thenRollBackProjectsInsert() {
+        Employee saveEmployee = EmployeeBuilder.anEmployee()
+                .withFirstName("First5")
+                .withLastName("Last5")
+                .withSalary(BigDecimal.TEN)
+                .withEmployeeType(EmployeeType.EMPLOYEE)
+                .withCubicle(new Cubicle(9999, null))
+                .withProjects(List.of(new Project(9999, "Test project")))
+                .build();
+    }
+
+    @Test
     void saveEmployeeFullGraph__whenBuildingDoesNotExists__thenThrowException() {
     }
 
