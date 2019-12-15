@@ -15,11 +15,7 @@ import java.util.stream.Collectors;
 public class EmployeeGraphRepo {
 
     private final JdbcUtil jdbcUtil;
-
-    static final String SELECT_ALL_PROJECTS_IN_PROJECT_NAME = """
-            SELECT p.id p_id, p.project_name p_project_name
-            FROM company.project p
-            WHERE p.project_name IN (%s)""";
+    private final SelectAllProjectsInProjectName selectAllProjectsInProjectName;
 
     static final String INSERT_ALL_PROJECTS = """
             INSERT INTO company.project (project_name)
@@ -33,10 +29,10 @@ public class EmployeeGraphRepo {
             INSERT INTO company.employee_project (employee_id, project_id)
             VALUES (?, ?)""";
 
-    public EmployeeGraphRepo(DataSource dataSource) {
+    public EmployeeGraphRepo(DataSource dataSource, SelectAllProjectsInProjectName selectAllProjectsInProjectName) {
         this.jdbcUtil = new JdbcUtil(dataSource);
+        this.selectAllProjectsInProjectName = selectAllProjectsInProjectName;
     }
-
 
     public Employee saveEmployeeFullGraph(Employee employee) {
         Connection conn = null;
@@ -47,22 +43,11 @@ public class EmployeeGraphRepo {
                 .map(Project::getProjectName)
                 .collect(Collectors.toList());
 
-        List<Project> foundProjects = new ArrayList<>();
-
-        String sql = String.format(SELECT_ALL_PROJECTS_IN_PROJECT_NAME, preparePlaceHolders(projects.size(), "", ","));
-
         try {
             conn = jdbcUtil.getConnection();
-            ps = conn.prepareStatement(sql);
-            setValues(ps, projectNames.toArray());
 
-            ResultSet rs = ps.executeQuery();
+            List<Project> foundProjects = selectAllProjectsInProjectName.select(projectNames);
 
-            while (rs.next()) {
-                var projectId = rs.getLong("p_id");
-                var projectName = rs.getString("p_project_name");
-                foundProjects.add(new Project(projectId, projectName));
-            }
 
             List<String> foundProjectNames = foundProjects.stream().map(Project::getProjectName).collect(Collectors.toList());
             List<String> nonExistingProjects = ListUtils.subtract(projectNames, foundProjectNames);
@@ -97,9 +82,6 @@ public class EmployeeGraphRepo {
             ps.executeUpdate();
 
             employee.setId(employeeGeneratedKey.get(0));
-
-
-
 
             conn.commit();
             return employee;
@@ -139,22 +121,5 @@ public class EmployeeGraphRepo {
             }
             return generatedKeys;
         }
-    }
-
-    public <T> long saveEmployeeFullGraph(Employee employee, Insert<T>... inserts) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            conn = jdbcUtil.getConnection();
-            conn.commit();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JdbcUtil.rollback(conn);
-        } finally {
-            JdbcUtil.closeStatement(ps);
-            JdbcUtil.closeConnection(conn);
-        }
-        throw new RuntimeException("Could not execute sql");
     }
 }

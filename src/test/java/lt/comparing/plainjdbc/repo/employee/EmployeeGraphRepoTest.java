@@ -6,6 +6,7 @@ import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.DoInConnection;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,7 +18,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
 
 class EmployeeGraphRepoTest {
 
@@ -28,7 +28,9 @@ class EmployeeGraphRepoTest {
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
         DataSource dataSource = H2DataSource.dataSource();
-        repo = new EmployeeGraphRepo(dataSource);
+        DoInConnection doInConnection = new DoInConnection(dataSource);
+        SelectAllProjectsInProjectName selectAllProjectsInProjectName = new SelectAllProjectsInProjectName(doInConnection);
+        repo = new EmployeeGraphRepo(dataSource, selectAllProjectsInProjectName);
     }
 
     @BeforeEach
