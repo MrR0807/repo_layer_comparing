@@ -3,6 +3,7 @@ package lt.comparing.service;
 import lt.comparing.config.H2DataSource;
 import lt.comparing.exceptions.EmployeeNotFoundException;
 import lt.comparing.fixture.EmployeeBuilder;
+import lt.comparing.fixture.ProjectFixture;
 import lt.comparing.plainjdbc.entity.Building;
 import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
@@ -154,9 +155,7 @@ class EmployeeServiceTest {
 
     @Test
     void saveEmployeeFullGraph__whenEmployeeDoesNotExistsButProjectsExists__thenCreateOnlyEmployee() {
-        List<Project> addedProjects = List.of(
-                new Project(2001, "Super project"),
-                new Project(2003, "Average project"));
+        List<Project> addedProjects = ProjectFixture.projects();
 
         Employee saveEmployee = EmployeeBuilder.anEmployee()
                 .withFirstName("First5")
@@ -228,6 +227,8 @@ class EmployeeServiceTest {
                 .withCubicle(new Cubicle(9999, null))
                 .withProjects(List.of(new Project(9999, "Test project")))
                 .build();
+
+
     }
 
     @Test

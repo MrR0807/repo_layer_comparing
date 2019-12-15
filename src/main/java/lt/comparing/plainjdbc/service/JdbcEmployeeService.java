@@ -46,7 +46,6 @@ public class JdbcEmployeeService implements EmployeeService {
         List<Project> persistedProjects = projectService.saveProjectsDiff(employee.getProjects());
 
 
-
         //Does cubicle exists else throw Exception
 
 

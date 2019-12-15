@@ -32,59 +32,26 @@ public class JdbcHelper {
         }
     }
 
-    public <T, R> R insert(String insert, InsertReturning<T, R> function, T t) {
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
-
-            return function.action(ps, t);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not execute statement");
-        }
-    }
-
     public <T> List<Long> insertReturnGeneratedKeys(String insert, Insert<T> function, T t) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
 
             function.action(ps, t);
 
-            return getGeneratedLeys(ps);
+            return getGeneratedKeys(ps);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not execute statement");
         }
     }
 
-    private static List<Long> getGeneratedLeys(PreparedStatement ps) throws SQLException {
+    private static List<Long> getGeneratedKeys(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.getGeneratedKeys()) {
             List<Long> generatedKeys = new ArrayList<>();
             while (rs.next()) {
                 generatedKeys.add(rs.getLong(1));
             }
             return generatedKeys;
-        }
-    }
-
-    public <T> void insert(String insert, Insert<T> function, T t) {
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(insert)) {
-
-            function.action(ps, t);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not execute statement");
-        }
-    }
-
-    public <T> void selectUpdatable(String insert, Insert<T> function, T t) {
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(insert, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE)) {
-
-            function.action(ps, t);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Could not execute statement");
         }
     }
 }

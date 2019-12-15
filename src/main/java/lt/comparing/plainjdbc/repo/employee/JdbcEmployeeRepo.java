@@ -5,11 +5,14 @@ import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.JdbcUtil;
 import lt.comparing.plainjdbc.repo.JdbcHelper;
 import lt.comparing.plainjdbc.repo.sqlfunction.Insert;
 import lt.comparing.plainjdbc.repo.sqlfunction.Select;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
