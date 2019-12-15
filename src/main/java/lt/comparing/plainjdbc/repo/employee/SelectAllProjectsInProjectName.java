@@ -32,7 +32,18 @@ public class SelectAllProjectsInProjectName {
         return doInConnection.select(sql, extractProjects);
     }
 
-    private List<Project> getProjects(List<String> projectNames, PreparedStatement ps) throws SQLException {
+    private static String preparePlaceHolders(int size, String prefix, String postfix) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            sb.append(prefix);
+            sb.append("?");
+            sb.append(postfix);
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
+    }
+
+    private static List<Project> getProjects(List<String> projectNames, PreparedStatement ps) throws SQLException {
         setValues(ps, projectNames.toArray());
         ResultSet rs = ps.executeQuery();
         List<Project> foundProjects = new ArrayList<>();
@@ -43,17 +54,6 @@ public class SelectAllProjectsInProjectName {
             foundProjects.add(new Project(projectId, projectName));
         }
         return foundProjects;
-    }
-
-    private static String preparePlaceHolders(int size, String prefix, String postfix) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            sb.append(prefix);
-            sb.append("?");
-            sb.append(postfix);
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        return sb.toString();
     }
 
     private static void setValues(PreparedStatement preparedStatement, Object... values) throws SQLException {

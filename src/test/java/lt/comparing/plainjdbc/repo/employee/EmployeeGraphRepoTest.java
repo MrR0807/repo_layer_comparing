@@ -30,7 +30,8 @@ class EmployeeGraphRepoTest {
         DataSource dataSource = H2DataSource.dataSource();
         DoInConnection doInConnection = new DoInConnection(dataSource);
         SelectAllProjectsInProjectName selectAllProjectsInProjectName = new SelectAllProjectsInProjectName(doInConnection);
-        repo = new EmployeeGraphRepo(dataSource, selectAllProjectsInProjectName);
+        InsertAllProjects insertAllProjects = new InsertAllProjects(doInConnection);
+        repo = new EmployeeGraphRepo(dataSource, selectAllProjectsInProjectName, insertAllProjects);
     }
 
     @BeforeEach
