@@ -6,7 +6,9 @@ import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
-import lt.comparing.plainjdbc.repo.DoInConnection;
+import lt.comparing.plainjdbc.repo.employeegraph.EmployeeGraphRepo;
+import lt.comparing.plainjdbc.repo.nonemployee.InsertAllProjects;
+import lt.comparing.plainjdbc.repo.nonemployee.SelectAllProjectsInProjectName;
 import lt.comparing.utils.H2Launcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,10 +30,7 @@ class EmployeeGraphRepoTest {
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
         DataSource dataSource = H2DataSource.dataSource();
-        DoInConnection doInConnection = new DoInConnection(dataSource);
-        SelectAllProjectsInProjectName selectAllProjectsInProjectName = new SelectAllProjectsInProjectName(doInConnection);
-        InsertAllProjects insertAllProjects = new InsertAllProjects(doInConnection);
-        repo = new EmployeeGraphRepo(dataSource, selectAllProjectsInProjectName, insertAllProjects);
+        repo = new EmployeeGraphRepo(dataSource, new InsertEmployee(), new SelectAllProjectsInProjectName(), new InsertAllProjects());
     }
 
     @BeforeEach

@@ -4,6 +4,9 @@ import lt.comparing.config.H2DataSource;
 import lt.comparing.exceptions.ProjectExistsException;
 import lt.comparing.fixture.ProjectFixture;
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.nonemployee.InsertAllProjects;
+import lt.comparing.plainjdbc.repo.nonemployee.SelectAllProjectsInProjectId;
+import lt.comparing.plainjdbc.repo.nonemployee.SelectAllProjectsInProjectName;
 import lt.comparing.plainjdbc.repo.project.JdbcProjectRepo;
 import lt.comparing.plainjdbc.service.JdbcProjectService;
 import lt.comparing.utils.H2Launcher;
@@ -28,7 +31,8 @@ class JdbcProjectServiceTest {
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
         DataSource dataSource = H2DataSource.dataSource();
-        projectService = new JdbcProjectService(new JdbcProjectRepo(dataSource));
+        projectService = new JdbcProjectService(new JdbcProjectRepo(dataSource, new SelectAllProjectsInProjectName(),
+                new SelectAllProjectsInProjectId(), new InsertAllProjects()));
     }
 
     @BeforeEach

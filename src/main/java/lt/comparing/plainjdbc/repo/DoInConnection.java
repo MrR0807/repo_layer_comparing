@@ -1,6 +1,6 @@
 package lt.comparing.plainjdbc.repo;
 
-import lt.comparing.plainjdbc.repo.sqlfunction.InsertReturning2;
+import lt.comparing.plainjdbc.repo.sqlfunction.InsertReturning;
 import lt.comparing.plainjdbc.repo.sqlfunction.Select;
 
 import javax.sql.DataSource;
@@ -25,7 +25,7 @@ public class DoInConnection {
         try {
             conn = dataSource.getConnection();
             ps = conn.prepareStatement(sql);
-            result = extractor.action(ps);
+            result = extractor.doInConnection(ps);
             conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -37,7 +37,7 @@ public class DoInConnection {
         return result;
     }
 
-    public <R> R insert(String sql, InsertReturning2<R> extractor) {
+    public <R> R insert(String sql, InsertReturning<R> extractor) {
         Connection conn = null;
         PreparedStatement ps = null;
         R result = null;
@@ -45,7 +45,7 @@ public class DoInConnection {
         try {
             conn = dataSource.getConnection();
             ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            result = extractor.action(ps);
+            result = extractor.doInConnection(ps);
             conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();

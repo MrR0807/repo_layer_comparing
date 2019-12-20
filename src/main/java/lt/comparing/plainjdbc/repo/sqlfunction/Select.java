@@ -5,5 +5,5 @@ import java.sql.SQLException;
 
 public interface Select<T> {
 
-    T action(PreparedStatement preparedStatement) throws SQLException;
+    T doInConnection(PreparedStatement preparedStatement) throws SQLException;
 }

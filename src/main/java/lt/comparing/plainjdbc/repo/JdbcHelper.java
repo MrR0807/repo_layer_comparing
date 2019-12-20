@@ -1,6 +1,5 @@
 package lt.comparing.plainjdbc.repo;
 
-import lt.comparing.plainjdbc.repo.sqlfunction.Insert;
 import lt.comparing.plainjdbc.repo.sqlfunction.InsertReturning;
 import lt.comparing.plainjdbc.repo.sqlfunction.Select;
 
@@ -25,19 +24,18 @@ public class JdbcHelper {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(select)) {
 
-            return function.action(ps);
+            return function.doInConnection(ps);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Could not execute statement");
         }
     }
 
-    public <T> List<Long> insertReturnGeneratedKeys(String insert, Insert<T> function, T t) {
+    public <T> List<Long> insertReturnGeneratedKeys(String insert, InsertReturning<T> function) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
 
-            function.action(ps, t);
-
+            function.doInConnection(ps);
             return getGeneratedKeys(ps);
         } catch (SQLException e) {
             e.printStackTrace();

@@ -9,7 +9,15 @@ import lt.comparing.plainjdbc.entity.Cubicle;
 import lt.comparing.plainjdbc.entity.Employee;
 import lt.comparing.plainjdbc.entity.EmployeeType;
 import lt.comparing.plainjdbc.entity.Project;
+import lt.comparing.plainjdbc.repo.employee.InsertEmployee;
 import lt.comparing.plainjdbc.repo.employee.JdbcEmployeeRepo;
+import lt.comparing.plainjdbc.repo.employee.SelectEmployee;
+import lt.comparing.plainjdbc.repo.employee.SelectEmployeeFullGraph;
+import lt.comparing.plainjdbc.repo.employee.SelectEmployees;
+import lt.comparing.plainjdbc.repo.employee.SelectEmployeesFullGraph;
+import lt.comparing.plainjdbc.repo.nonemployee.InsertAllProjects;
+import lt.comparing.plainjdbc.repo.nonemployee.SelectAllProjectsInProjectId;
+import lt.comparing.plainjdbc.repo.nonemployee.SelectAllProjectsInProjectName;
 import lt.comparing.plainjdbc.repo.project.JdbcProjectRepo;
 import lt.comparing.plainjdbc.service.JdbcEmployeeService;
 import lt.comparing.plainjdbc.service.JdbcProjectService;
@@ -39,8 +47,10 @@ class EmployeeServiceTest {
     static void initialize() {
         h2Launcher = H2Launcher.startTcpServer();
         DataSource dataSource = H2DataSource.dataSource();
-        JdbcProjectService projectService = new JdbcProjectService(new JdbcProjectRepo(dataSource));
-        service = new JdbcEmployeeService(new JdbcEmployeeRepo(dataSource), projectService);
+        JdbcProjectService projectService = new JdbcProjectService(new JdbcProjectRepo(dataSource, new SelectAllProjectsInProjectName(), new SelectAllProjectsInProjectId(), new InsertAllProjects()));
+        service = new JdbcEmployeeService(new JdbcEmployeeRepo(dataSource, new SelectEmployee(), new SelectEmployees(), new SelectEmployeeFullGraph(),
+                new SelectEmployeesFullGraph(), new InsertEmployee()),
+                projectService);
     }
 
     @BeforeEach
